@@ -12,48 +12,26 @@ class Gender(models.TextChoices):
     FEMALE = "F", "Female"
 
 
-class Identity(models.TextChoices):
-    """
-    Identity choices for user.
-    """
-
-    READER = "READER"
-    AUTHOR = "AUTHOR"
-    PUBLISHER = "PUBLISHER"
-
-
-class Address(models.Model):
-    """
-    Address model for user.
-    """
-
-    id = models.AutoField(primary_key=True)
-    location = models.CharField(max_length=255, blank=True)
-    # city = models.CharField(max_length=255, blank=True)
-    # state = models.CharField(max_length=255, blank=True)
-    country = models.CharField(max_length=255, blank=True)
-
-
-class User(AbstractUser):
+class User(models.Model):
     """
     User override model for authentication.
     """
 
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
+    national_id = models.CharField(max_length=55, unique=True)
+    name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
-    phone = models.CharField(max_length=20, blank=True)
-    identity = models.CharField(max_length=55, choices=Identity)
-    gender = models.CharField(max_length=55, choices=Gender, blank=True)
-    profile_image = models.ImageField(upload_to="media/profile_images/", blank=True)
+    phone_number = models.CharField(max_length=20)
+    gender = models.CharField(max_length=8, choices=Gender)
     bio = models.TextField(blank=True)
-    birth_date = models.DateField(blank=True, null=True)
-    join_date = models.DateTimeField(default=timezone.now)
-    address = models.OneToOneField(
-        Address, on_delete=models.CASCADE, blank=True, null=True
-    )
-
+    nationality = models.CharField(max_length=100)
+    location = models.CharField(max_length=55)
+    city = models.CharField(max_length=55)
+    country = models.CharField(max_length=55)
+    date_of_birth = models.DateField()
+    date_joined = models.DateTimeField(default=timezone.now)
+    
     # django depend on username in authentication process but
     # we want to depend on email in authentication process
     # because email is unique field
@@ -61,3 +39,50 @@ class User(AbstractUser):
     username = None
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    class Meta:
+        abstract = True
+
+
+class Patient(User):
+    profile_image = models.ImageField(upload_to="media/profile_images/", blank=True, null=True)
+    chronic_diseases = models.CharField(max_length=255, blank=True, null=True)
+    medical_report = models.FileField(upload_to='media/reports/', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Doctor(User):
+    profile_image = models.ImageField(upload_to="media/profile_images/")
+    specialization = models.CharField(max_length=100)
+    certificates = models.FileField(upload_to='media/certificates/', blank=True, null=True)
+    medical_accreditations = models.CharField(max_length=255, blank=True)
+    available_working_hours = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+
+class Admin(User):
+    profile_image = models.ImageField(upload_to="media/profile_images/")
+
+    def __str__(self):
+        return self.name
+
+
+class Session(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='sessions')
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='sessions')
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    remaining_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_sessions = models.PositiveIntegerField()
+    remaining_sessions = models.PositiveIntegerField()
+    # prev_session = models.OneToOneField("self", on_delete=models.CASCADE, related_name='prev', null=True)
+    # next_session = models.OneToOneField("self", on_delete=models.CASCADE, related_name='next', null=True)
+    place = models.CharField(max_length=100)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    def __str__(self):
+        return f"Session between {self.patient.name} and {self.doctor.name}"

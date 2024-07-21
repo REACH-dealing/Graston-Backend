@@ -41,16 +41,16 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-    # User authentication end points
-    path("auth/register/", RegisterView.as_view({"post": "create"})),
-    path("auth/login/", LoginView.as_view({"post": "login"})),
-    path("auth/logout/", LogoutView.as_view({"post": "logout"})),
-    path("auth/user/", UserView.as_view({"get": "retrieve"})),
-    # User end points
-    path("users/", UserViewSet.as_view({"get": "list"})),
-    path(
-        "users/<int:pk>/",
-        UserViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"}),
-    ),
-    path("users/search/<str:string>/", UserSearch.as_view({"get": "list"})),
+    # # User authentication end points
+    # path("auth/register/", RegisterView.as_view({"post": "create"})),
+    # path("auth/login/", LoginView.as_view({"post": "login"})),
+    # path("auth/logout/", LogoutView.as_view({"post": "logout"})),
+    # path("auth/user/", UserView.as_view({"get": "retrieve"})),
+    # # User end points
+    # path("users/", UserViewSet.as_view({"get": "list"})),
+    # path(
+    #     "users/<int:pk>/",
+    #     UserViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"}),
+    # ),
+    # path("users/search/<str:string>/", UserSearch.as_view({"get": "list"})),
 ]

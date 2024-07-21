@@ -79,16 +79,30 @@ WSGI_APPLICATION = "Kraston.wsgi.application"
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 
+from dotenv import load_dotenv
+load_dotenv()
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "kraston",
-        "USER": "postgres",
-        "PASSWORD": "backend",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.environ.get("POSTGRES_DATABASE"),
+        "USER": os.environ.get("POSTGRES_USER"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST"),
+        "PORT": os.environ.get("5432"),
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "kraston",
+#         "USER": "postgres",
+#         "PASSWORD": "backend",
+#         "HOST": "localhost",
+#         "PORT": "5432",
+#     }
+# }
 
 # DATABASES = {
 #     "default": dj_database_url.parse(
@@ -133,7 +147,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 MEDIA_URL = "media/"
 
-AUTH_USER_MODEL = "users.User"
+# AUTH_USER_MODEL = "users.User"
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True

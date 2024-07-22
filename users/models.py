@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 
 
 class Gender(models.TextChoices):
@@ -39,7 +39,8 @@ class User(AbstractUser):
     is_staff = None
     is_active = None
     last_login = None
-    
+    groups = None
+    user_permissions = None
     # django depend on username in authentication process but
     # we want to depend on email in authentication process
     # because email is unique field
@@ -79,13 +80,15 @@ class Admin(User):
 
 
 class AbstractSession(models.Model):
-    pass
+    id = models.AutoField(primary_key=True)
+    session_type = models.CharField(max_length=55)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
 
-class Session(models.Model):
+
+class Session(AbstractSession):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='sessions')
     nurse = models.ForeignKey(Nurse, on_delete=models.CASCADE, related_name='sessions')
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    remaining_price = models.DecimalField(max_digits=10, decimal_places=2)
+    paid_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_sessions = models.PositiveIntegerField()
     remaining_sessions = models.PositiveIntegerField()
     prev_session = models.OneToOneField("self", on_delete=models.CASCADE, related_name='prev', null=True)

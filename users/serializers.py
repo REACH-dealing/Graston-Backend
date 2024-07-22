@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Patient, Nurse, Admin, Session
+from .models import User, Patient, Nurse, Admin, AbstractSession, Session
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -83,6 +83,20 @@ class AdminSerializer(serializers.ModelSerializer):
         fields = ["profile_image"]
 
 
+class AbstractSessionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for AbstractSession model.
+    """
+
+    class Meta:
+        model = AbstractSession
+        fields = [
+            "id",
+            "session_type",
+            "price",
+        ]
+
+
 class SessionSerializer(serializers.ModelSerializer):
     """
     Serializer for Session model.
@@ -91,10 +105,12 @@ class SessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Session
         fields = [
+            "id",
+            "session_type",
+            "price",
             "patient",
             "nurse",
-            "price",
-            "remaining_price",
+            "paid_price",
             "total_sessions",
             "remaining_sessions",
             "prev_session",
@@ -104,5 +120,6 @@ class SessionSerializer(serializers.ModelSerializer):
             "end_time",
         ]
         extra_kwargs = {
-            "password": {"write_only": True},
+            "session_type": {"read_only": True},
+            "price": {"read_only": True},
         }

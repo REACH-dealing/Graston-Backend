@@ -1,25 +1,34 @@
-# from rest_framework.response import Response
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, renderer_classes
+from django.core.mail import send_mail
 # from rest_framework.exceptions import AuthenticationFailed
-# from .serializers import UserSerializer
-# from .models import User
+from .serializers import UserRegisterSerializer
+from .models import User
 # import jwt, datetime
 # from rest_framework import status
-# from rest_framework import viewsets, pagination
+from rest_framework import viewsets, pagination
 
 
-# class RegisterView(viewsets.ModelViewSet):
-#     """
-#     Create a new user.
-#     """
+class RegisterView(viewsets.ModelViewSet):
+    """
+    Create a new user.
+    """
 
-#     queryset = User.objects.none()
-#     serializer_class = UserSerializer
+    queryset = User.objects.none()
+    serializer_class = UserRegisterSerializer
 
-#     def create(self, request):
-#         serializer = self.serializer_class(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        user_data = serializer.data
+        user = User.objects.get(id=user_data['id'])
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        })
+
 
 
 # class LoginView(viewsets.ModelViewSet):
@@ -199,3 +208,28 @@
 
 #         serializer = self.get_serializer(queryset, many=True)
 #         return Response(serializer.data)
+
+
+
+
+@api_view(['POST'])
+def send_simple_email(request):
+    send_mail(
+        'Subject here',
+        'Body text here',
+        'sender@gmail.com',
+        ['mostafaelzoghbeywork1@gmail.com'],
+        fail_silently=False,
+    )
+
+    return Response()
+
+from rest_framework_simplejwt.tokens import RefreshToken
+
+class Tokens(viewsets.ModelViewSet):
+    def post(self, request):
+        refresh = RefreshToken
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        })

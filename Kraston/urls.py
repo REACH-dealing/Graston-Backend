@@ -42,7 +42,7 @@ urlpatterns = [
         name="redoc",
     ),
     # # User authentication end points
-    # path("auth/register/", RegisterView.as_view({"post": "create"})),
+    path("auth/register/", RegisterView.as_view({"post": "create"})),
     # path("auth/login/", LoginView.as_view({"post": "login"})),
     # path("auth/logout/", LogoutView.as_view({"post": "logout"})),
     # path("auth/user/", UserView.as_view({"get": "retrieve"})),
@@ -53,4 +53,6 @@ urlpatterns = [
     #     UserViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"}),
     # ),
     # path("users/search/<str:string>/", UserSearch.as_view({"get": "list"})),
+    path("send-email/", send_simple_email, name="send_email"),
+    path("api/token/", Tokens.as_view({"post": "post"}), name="token_obtain_pair"),
 ]

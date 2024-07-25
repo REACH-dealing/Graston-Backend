@@ -29,7 +29,7 @@ class User(AbstractUser):
     """
 
     id = models.AutoField(primary_key=True)
-    national_id = models.CharField(max_length=55, unique=True, blank=True)
+    national_id = models.CharField(max_length=55, unique=True)
     identity = models.CharField(max_length=8, choices=Identity)
     gender = models.CharField(max_length=8, choices=Gender, blank=True)
     phone_number = models.CharField(max_length=20, blank=True)
@@ -40,8 +40,9 @@ class User(AbstractUser):
     country = models.CharField(max_length=28, blank=True)
     date_of_birth = models.DateField(blank=True)
     profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
 
-    is_active = None
+
     last_login = None
     groups = None
     user_permissions = None

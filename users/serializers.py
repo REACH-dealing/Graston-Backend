@@ -5,13 +5,14 @@ from .models import User, Patient, Nurse, Admin
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     """
-    Serializer for User model.
+    Serializer for User Registeration.
     """
 
     class Meta:
         model = User
         fields = [
             "id",
+            "national_id"
             "username",
             "first_name",
             "last_name",

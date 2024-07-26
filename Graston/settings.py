@@ -55,7 +55,7 @@ MIDDLEWARE = [
     # "users.middleware.AuthenticationMiddleware",
 ]
 
-ROOT_URLCONF = "Kraston.urls"
+ROOT_URLCONF = "Graston.urls"
 
 TEMPLATES = [
     {
@@ -73,7 +73,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "Kraston.wsgi.application"
+WSGI_APPLICATION = "Graston.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -96,7 +96,7 @@ DATABASES = {
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "kraston",
+#         "NAME": "Graston",
 #         "USER": "postgres",
 #         "PASSWORD": "backend",
 #         "HOST": "localhost",

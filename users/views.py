@@ -1,13 +1,13 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes
 from django.core.mail import send_mail
-# from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed
 from .serializers import UserRegisterSerializer
 from .models import User
-# import jwt, datetime
-# from rest_framework import status
+import jwt, datetime
+from rest_framework import status
 from rest_framework import viewsets, pagination
-
+import Graston.settings
 
 class RegisterView(viewsets.ModelViewSet):
     """
@@ -31,47 +31,84 @@ class RegisterView(viewsets.ModelViewSet):
 
 
 
-# class LoginView(viewsets.ModelViewSet):
-#     """
-#     User Login.
-#     """
+class LoginView(viewsets.ModelViewSet):
+    """
+    User Login.
+    """
 
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
-#     def login(self, request):
-#         """
-#         User Login.
+    def login(self, request):
+        """
+        User Login.
 
-#         Returns:
-#             {"jwt": token} in json format and in cookie.
-#         """
-#         email = request.data["email"]
-#         password = request.data["password"]
+        Returns:
+            {"access": access_token, "refresh": refresh_token } in
+            json format and in cookie.
+        """
+        email = request.data["email"]
+        password = request.data["password"]
 
-#         user = self.get_queryset().filter(email=email).first()
+        user = self.get_queryset().filter(email=email).first()
 
-#         if user is None:
-#             raise AuthenticationFailed("User not found!")
+        if not user:
+            raise AuthenticationFailed("User not found!")
 
-#         if not user.check_password(password):
-#             raise AuthenticationFailed("Incorrect password!")
+        if not user.check_password(password):
+            raise AuthenticationFailed("Incorrect password!")
 
-#         payload = {
-#             "id": user.id,
-#             "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=180),
-#             "iat": datetime.datetime.utcnow(),
-#         }
+        if not user.is_active:
+            raise AuthenticationFailed('Account disabled, contact admin')
 
-#         token = jwt.encode(payload, "secret", algorithm="HS256")
+        if not user.is_verified:
+            raise AuthenticationFailed('Email is not verified, activate your account')
 
-#         response = Response()
+        access_payload = {
+            "user_id": user.id,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=180),
+            "iat": datetime.datetime.utcnow(),
+            "refresh": False,
+        }
 
-#         response.set_cookie(key="jwt", value=token, httponly=True)
-#         response.data = {"jwt": token}
-#         return response
+        refresh_payload = {
+            "user_id": user.id,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=180),
+            "iat": datetime.datetime.utcnow(),
+            "refresh": True,
+        }
+
+        access_token = jwt.encode(access_payload, settings.SECRET_KEY, algorithm="HS256")
+        refresh_token = jwt.encode(refresh_payload, settings.SECRET_KEY, algorithm="HS256")
+
+        response = Response()
+
+        response.set_cookie(key="access", value=access_token, httponly=True)
+        response.set_cookie(key="refresh", value=refresh_token, httponly=True)
+        response.data = {"access": access_token, "refresh": refresh_token }
+        return response
 
 
+class RefreshTokenView(viewsets.ModelViewSet):
+    def refresh(self, request):
+        token = request.headers.get("Authorization") or request.COOKIES.get("refresh")
+
+        if not token:
+            return NotAuthenticated({"detail": "Invalid token!"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+
+        except jwt.ExpiredSignatureError:
+            return AuthenticationFailed({"detail": "Token is expired!"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        except jwt.exceptions.DecodeError as identifier:
+            return AuthenticationFailed({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        if payload["refresh"] == False:
+            return AuthenticationFailed({"detail": "This is not refresh token, you must send refresh token!"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # continue
 # class UserView(viewsets.ModelViewSet):
 #     """
 #     Check Authentication and Retrieve User.

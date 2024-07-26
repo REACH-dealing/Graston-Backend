@@ -51,6 +51,13 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         # return instance
 
 
+class UserLoginSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
+
 class PatientSerializer(serializers.ModelSerializer):
     """
     Serializer for patient model
@@ -59,6 +66,7 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = [
+            "user",
             "profile_image",
             "chronic_diseases",
             "medical_report",
@@ -73,6 +81,7 @@ class NurseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nurse
         fields = [
+            "user",
             "profile_image",
             "specialization",
             "certificates",
@@ -88,7 +97,7 @@ class AdminSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Admin
-        fields = ["profile_image"]
+        fields = ["user"]
 
 
 # class AbstractSessionSerializer(serializers.ModelSerializer):

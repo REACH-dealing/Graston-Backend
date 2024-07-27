@@ -2,7 +2,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes
 from django.core.mail import send_mail
 from rest_framework.exceptions import AuthenticationFailed
-from .serializers import UserRegisterSerializer, UserLoginSerializer
+from django.http import JsonResponse
+from .serializers import UserRegisterSerializer, UserLoginSerializer, UserNoDataSerializer
 from .models import User
 import jwt, datetime
 from rest_framework import status
@@ -23,9 +24,7 @@ class RegisterView(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         user_data = serializer.data
-        user = User.objects.get(id=user_data["id"])
-        refresh = RefreshToken.for_user(user)
-        return Response({"refresh": str(refresh), "access": str(refresh.access_token)})
+        return Response({"detail": "Activate your accout"})
 
 
 def get_tokens(user):
@@ -40,10 +39,11 @@ def get_tokens(user):
     refresh_payload = {
         "user_id": user.id,
         "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=70),
-        "iat": datetime.datetime.utcnow() + datetime.timedelta(minutes=58),
+        "iat": datetime.datetime.utcnow(),
         "refresh": True,
     }
 
+    # remember to search about best encoding algorithm
     access_token = jwt.encode(access_payload, SECRET_KEY, algorithm="HS256")
     refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
 
@@ -96,7 +96,10 @@ class RefreshTokenView(viewsets.ModelViewSet):
     Refresh token.
     """
 
-    def refresh(self, request):
+    queryset = User.objects.all()
+    serializer_class = UserNoDataSerializer
+
+    def refresh_token(self, request):
         """
         Refresh token.
 
@@ -104,39 +107,30 @@ class RefreshTokenView(viewsets.ModelViewSet):
             {"access": access_token, "refresh": refresh_token } in
             json format and in cookie.
         """
+
+        # remember to search which is best method for auth (cookies or header)
         token = request.headers.get("Authorization") or request.COOKIES.get("refresh")
 
         if not token:
-            return NotAuthenticated(
-                {"detail": "Invalid token!"}, status=status.HTTP_401_UNAUTHORIZED
-            )
+            return JsonResponse({"detail": "There is no refresh token"})
 
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
 
         except jwt.ExpiredSignatureError:
-            return AuthenticationFailed(
-                {"detail": "Token is expired!"}, status=status.HTTP_401_UNAUTHORIZED
-            )
+            return JsonResponse({"detail": "Token is expired!"})
 
         except jwt.exceptions.DecodeError as identifier:
-            return AuthenticationFailed(
-                {"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED
-            )
+            return JsonResponse({'error': 'Invalid token'})
 
         if payload["refresh"] == False:
-            return AuthenticationFailed(
-                {"detail": "This is not refresh token, you must send refresh token!"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+            return JsonResponse({"detail": "This is not refresh token, you must send refresh token!"})
 
         user = User.objects.filter(id=payload["user_id"]).first()
         if not user:
-            return NotAuthenticated(
-                {"detail": "Unauthenticated!"}, status=status.HTTP_401_UNAUTHORIZED
-            )
+            return JsonResponse({"detail": "Unauthenticated!"})
 
-        access_token, refresh_token = get_tokens()
+        access_token, refresh_token = get_tokens(user)
         response = Response()
         response.set_cookie(key="access", value=access_token, httponly=True)
         response.set_cookie(key="refresh", value=refresh_token, httponly=True)
@@ -144,41 +138,42 @@ class RefreshTokenView(viewsets.ModelViewSet):
         return response
 
 
-# class UserView(viewsets.ModelViewSet):
-#     """
-#     Check Authentication and Retrieve User.
-#     """
+class UserView(viewsets.ModelViewSet):
+    """
+    Check Authentication and Retrieve User.
+    """
 
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
+    queryset = User.objects.all()
+    serializer_class = UserRegisterSerializer
 
-#     def retrieve(self, request):
-#         """
-#         Retrieve Login User data after checking authentication.
-#         """
-#         user = request.user
-#         serializer = self.serializer_class(user)
-#         return Response(serializer.data)
+    def retrieve(self, request):
+        """
+        Retrieve Login User data after checking authentication.
+        """
+        user = request.user
+        serializer = self.serializer_class(user)
+        return Response(serializer.data)
 
 
-# class LogoutView(viewsets.ModelViewSet):
-#     """
-#     User Logout and Delete Cookie.
-#     """
+class LogoutView(viewsets.ModelViewSet):
+    """
+    User Logout and Delete Cookie.
+    """
 
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
+    queryset = User.objects.all()
+    serializer_class = UserNoDataSerializer
 
-#     def logout(self, request):
-#         """
-#         User Logout and Delete Cookie.
+    def logout(self, request):
+        """
+        User Logout and Delete Cookie.
 
-#         Note: request body is not required.
-#         """
-#         response = Response()
-#         response.delete_cookie("jwt")
-#         response.data = {"message": "success"}
-#         return response
+        Note: request body is not required.
+        """
+        response = Response()
+        response.delete_cookie("access")
+        response.delete_cookie("refresh")
+        response.data = {"message": "success"}
+        return response
 
 
 # class UserViewSet(viewsets.ModelViewSet):
@@ -282,23 +277,23 @@ class RefreshTokenView(viewsets.ModelViewSet):
 #         return Response(serializer.data)
 
 
-@api_view(["POST"])
-def send_simple_email(request):
-    send_mail(
-        "Subject here",
-        "Body text here",
-        "sender@gmail.com",
-        ["mostafaelzoghbeywork1@gmail.com"],
-        fail_silently=False,
-    )
+# @api_view(["POST"])
+# def send_simple_email(request):
+#     send_mail(
+#         "Subject here",
+#         "Body text here",
+#         "sender@gmail.com",
+#         ["mostafaelzoghbeywork1@gmail.com"],
+#         fail_silently=False,
+#     )
 
-    return Response()
-
-
-from rest_framework_simplejwt.tokens import RefreshToken
+#     return Response()
 
 
-class Tokens(viewsets.ModelViewSet):
-    def post(self, request):
-        refresh = RefreshToken
-        return Response({"refresh": str(refresh), "access": str(refresh.access_token)})
+# from rest_framework_simplejwt.tokens import RefreshToken
+
+
+# class Tokens(viewsets.ModelViewSet):
+#     def post(self, request):
+#         refresh = RefreshToken
+#         return Response({"refresh": str(refresh), "access": str(refresh.access_token)})

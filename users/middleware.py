@@ -1,16 +1,16 @@
 import jwt
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
-from rest_framework import status
 from django.http import JsonResponse
+from rest_framework import status
 from users.models import User
-import Graston.settings
+from Graston.settings import SECRET_KEY
 
 class AuthenticationMiddleware(MiddlewareMixin):
     EXEMPT_PATHS = [
-        "",
         "/auth/register/",
         "/auth/login/",
+        "/auth/refresh-token/",
         "/api/schema/",
         "/api/schema/swagger-ui/",
         "/api/schema/redoc/",
@@ -22,13 +22,14 @@ class AuthenticationMiddleware(MiddlewareMixin):
         ):
             return None
 
+        # remember to search which is best method for auth (cookies or header)
         token = request.headers.get("Authorization") or request.COOKIES.get("access")
 
         if not token:
-            return JsonResponse({"detail": "Invalid token"})
+            return JsonResponse({"detail": "There is no access token"})
 
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
 
         except jwt.ExpiredSignatureError:
             return JsonResponse({"detail": "Token is expired!"})

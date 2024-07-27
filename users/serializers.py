@@ -26,7 +26,18 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "date_of_birth",
         ]
         extra_kwargs = {
-            "password": {"write_only": True},
+            "password": {"required": True, "write_only": True},
+            "national_id": {"required": True},
+            "username": {"required": True},
+            "first_name": {"required": True},
+            "last_name": {"required": True},
+            "email": {"required": True},
+            "identity": {"required": True},
+            "gender": {"required": True},
+            "location": {"required": True},
+            "city": {"required": True},
+            "country": {"required": True},
+            "date_of_birth": {"required": True},
         }
 
     @transaction.atomic
@@ -56,7 +67,17 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["email", "password"]
+        extra_kwargs = {
+            "password": {"required": True, "write_only": True},
+            "email": {"required": True},
+        }
 
+
+class UserNoDataSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = []
 
 # class PatientSerializer(serializers.ModelSerializer):
 #     """

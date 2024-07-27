@@ -151,6 +151,9 @@ MEDIA_URL = "media/"
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    'https://8000-idx-django-workspace-1721820460889.cluster-6yqpn75caneccvva7hjo4uejgk.cloudworkstations.dev'
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",  # for api auto documentation

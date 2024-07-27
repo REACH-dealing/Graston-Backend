@@ -12,7 +12,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "id",
-            "national_id"
+            "national_id",
             "username",
             "first_name",
             "last_name",
@@ -41,7 +41,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             Patient.objects.create(user=user)
         elif user.identity == "Nurse" or user.identity == "D":
             Nurse.objects.create(user=user)
-    
+
         return user
         # password = validated_data.pop("password", None)
         # instance = self.Meta.model(**validated_data)
@@ -55,14 +55,14 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password']
+        fields = ["email", "password"]
 
 
 # class PatientSerializer(serializers.ModelSerializer):
 #     """
 #     Serializer for patient model
 #     """
-    
+
 #     class Meta:
 #         model = Patient
 #         fields = [
@@ -77,7 +77,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
 #     """
 #     Serializer for Nurse model
 #     """
-    
+
 #     class Meta:
 #         model = Nurse
 #         fields = [
@@ -94,7 +94,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
 #     """
 #     Serializer for Admin model
 #     """
-    
+
 #     class Meta:
 #         model = Admin
 #         fields = ["user"]

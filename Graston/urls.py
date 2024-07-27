@@ -53,6 +53,6 @@ urlpatterns = [
     #     UserViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"}),
     # ),
     # path("users/search/<str:string>/", UserSearch.as_view({"get": "list"})),
-    # path("send-email/", send_simple_email, name="send_email"),
-    # path("api/token/", Tokens.as_view({"post": "post"}), name="token_obtain_pair"),
+    path("send-email/", send_simple_email, name="send_email"),
+    path("api/token/", Tokens.as_view({"post": "post"}), name="token_obtain_pair"),
 ]

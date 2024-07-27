@@ -7,7 +7,8 @@ from .models import User
 import jwt, datetime
 from rest_framework import status
 from rest_framework import viewsets, pagination
-import Graston.settings
+from Graston.settings import SECRET_KEY
+
 
 class RegisterView(viewsets.ModelViewSet):
     """
@@ -22,21 +23,19 @@ class RegisterView(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         user_data = serializer.data
-        user = User.objects.get(id=user_data['id'])
+        user = User.objects.get(id=user_data["id"])
         refresh = RefreshToken.for_user(user)
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token)
-        })
+        return Response({"refresh": str(refresh), "access": str(refresh.access_token)})
 
 
-def get_tokens():
+def get_tokens(user):
+
     access_payload = {
-            "user_id": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=61),
-            "iat": datetime.datetime.utcnow(),
-            "refresh": False,
-        }
+        "user_id": user.id,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=61),
+        "iat": datetime.datetime.utcnow(),
+        "refresh": False,
+    }
 
     refresh_payload = {
         "user_id": user.id,
@@ -45,8 +44,8 @@ def get_tokens():
         "refresh": True,
     }
 
-    access_token = jwt.encode(access_payload, settings.SECRET_KEY, algorithm="HS256")
-    refresh_token = jwt.encode(refresh_payload, settings.SECRET_KEY, algorithm="HS256")
+    access_token = jwt.encode(access_payload, SECRET_KEY, algorithm="HS256")
+    refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
 
     return access_token, refresh_token
 
@@ -79,16 +78,16 @@ class LoginView(viewsets.ModelViewSet):
             raise AuthenticationFailed("Incorrect password!")
 
         if not user.is_active:
-            raise AuthenticationFailed('Account disabled, contact admin')
+            raise AuthenticationFailed("Account disabled, contact admin")
 
-        if not user.is_verified:
-            raise AuthenticationFailed('Email is not verified, activate your account')
+        # if not user.is_verified:
+        #     raise AuthenticationFailed("Email is not verified, activate your account")
 
-        access_token, refresh_token = get_tokens()
+        access_token, refresh_token = get_tokens(user)
         response = Response()
         response.set_cookie(key="access", value=access_token, httponly=True)
         response.set_cookie(key="refresh", value=refresh_token, httponly=True)
-        response.data = {"access": access_token, "refresh": refresh_token }
+        response.data = {"access": access_token, "refresh": refresh_token}
         return response
 
 
@@ -108,30 +107,42 @@ class RefreshTokenView(viewsets.ModelViewSet):
         token = request.headers.get("Authorization") or request.COOKIES.get("refresh")
 
         if not token:
-            return NotAuthenticated({"detail": "Invalid token!"}, status=status.HTTP_401_UNAUTHORIZED)
+            return NotAuthenticated(
+                {"detail": "Invalid token!"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
 
         except jwt.ExpiredSignatureError:
-            return AuthenticationFailed({"detail": "Token is expired!"}, status=status.HTTP_401_UNAUTHORIZED)
+            return AuthenticationFailed(
+                {"detail": "Token is expired!"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
         except jwt.exceptions.DecodeError as identifier:
-            return AuthenticationFailed({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+            return AuthenticationFailed(
+                {"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+
         if payload["refresh"] == False:
-            return AuthenticationFailed({"detail": "This is not refresh token, you must send refresh token!"}, status=status.HTTP_401_UNAUTHORIZED)
+            return AuthenticationFailed(
+                {"detail": "This is not refresh token, you must send refresh token!"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         user = User.objects.filter(id=payload["user_id"]).first()
         if not user:
-            return NotAuthenticated({"detail": "Unauthenticated!"}, status=status.HTTP_401_UNAUTHORIZED)
+            return NotAuthenticated(
+                {"detail": "Unauthenticated!"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
         access_token, refresh_token = get_tokens()
         response = Response()
         response.set_cookie(key="access", value=access_token, httponly=True)
         response.set_cookie(key="refresh", value=refresh_token, httponly=True)
-        response.data = {"access": access_token, "refresh": refresh_token }
+        response.data = {"access": access_token, "refresh": refresh_token}
         return response
+
 
 # class UserView(viewsets.ModelViewSet):
 #     """
@@ -271,26 +282,23 @@ class RefreshTokenView(viewsets.ModelViewSet):
 #         return Response(serializer.data)
 
 
-
-
-@api_view(['POST'])
+@api_view(["POST"])
 def send_simple_email(request):
     send_mail(
-        'Subject here',
-        'Body text here',
-        'sender@gmail.com',
-        ['mostafaelzoghbeywork1@gmail.com'],
+        "Subject here",
+        "Body text here",
+        "sender@gmail.com",
+        ["mostafaelzoghbeywork1@gmail.com"],
         fail_silently=False,
     )
 
     return Response()
 
+
 from rest_framework_simplejwt.tokens import RefreshToken
+
 
 class Tokens(viewsets.ModelViewSet):
     def post(self, request):
         refresh = RefreshToken
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token)
-        })
+        return Response({"refresh": str(refresh), "access": str(refresh.access_token)})

@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes
 from django.core.mail import send_mail
 from rest_framework.exceptions import AuthenticationFailed
-from .serializers import UserRegisterSerializer
+from .serializers import UserRegisterSerializer, UserLoginSerializer
 from .models import User
 import jwt, datetime
 from rest_framework import status
@@ -30,6 +30,26 @@ class RegisterView(viewsets.ModelViewSet):
         })
 
 
+def get_tokens():
+    access_payload = {
+            "user_id": user.id,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=61),
+            "iat": datetime.datetime.utcnow(),
+            "refresh": False,
+        }
+
+    refresh_payload = {
+        "user_id": user.id,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=70),
+        "iat": datetime.datetime.utcnow() + datetime.timedelta(minutes=58),
+        "refresh": True,
+    }
+
+    access_token = jwt.encode(access_payload, settings.SECRET_KEY, algorithm="HS256")
+    refresh_token = jwt.encode(refresh_payload, settings.SECRET_KEY, algorithm="HS256")
+
+    return access_token, refresh_token
+
 
 class LoginView(viewsets.ModelViewSet):
     """
@@ -37,7 +57,7 @@ class LoginView(viewsets.ModelViewSet):
     """
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserLoginSerializer
 
     def login(self, request):
         """
@@ -64,25 +84,8 @@ class LoginView(viewsets.ModelViewSet):
         if not user.is_verified:
             raise AuthenticationFailed('Email is not verified, activate your account')
 
-        access_payload = {
-            "user_id": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=180),
-            "iat": datetime.datetime.utcnow(),
-            "refresh": False,
-        }
-
-        refresh_payload = {
-            "user_id": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=180),
-            "iat": datetime.datetime.utcnow(),
-            "refresh": True,
-        }
-
-        access_token = jwt.encode(access_payload, settings.SECRET_KEY, algorithm="HS256")
-        refresh_token = jwt.encode(refresh_payload, settings.SECRET_KEY, algorithm="HS256")
-
+        access_token, refresh_token = get_tokens()
         response = Response()
-
         response.set_cookie(key="access", value=access_token, httponly=True)
         response.set_cookie(key="refresh", value=refresh_token, httponly=True)
         response.data = {"access": access_token, "refresh": refresh_token }
@@ -90,7 +93,18 @@ class LoginView(viewsets.ModelViewSet):
 
 
 class RefreshTokenView(viewsets.ModelViewSet):
+    """
+    Refresh token.
+    """
+
     def refresh(self, request):
+        """
+        Refresh token.
+
+        Returns:
+            {"access": access_token, "refresh": refresh_token } in
+            json format and in cookie.
+        """
         token = request.headers.get("Authorization") or request.COOKIES.get("refresh")
 
         if not token:
@@ -108,7 +122,17 @@ class RefreshTokenView(viewsets.ModelViewSet):
         if payload["refresh"] == False:
             return AuthenticationFailed({"detail": "This is not refresh token, you must send refresh token!"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # continue
+        user = User.objects.filter(id=payload["user_id"]).first()
+        if not user:
+            return NotAuthenticated({"detail": "Unauthenticated!"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        access_token, refresh_token = get_tokens()
+        response = Response()
+        response.set_cookie(key="access", value=access_token, httponly=True)
+        response.set_cookie(key="refresh", value=refresh_token, httponly=True)
+        response.data = {"access": access_token, "refresh": refresh_token }
+        return response
+
 # class UserView(viewsets.ModelViewSet):
 #     """
 #     Check Authentication and Retrieve User.

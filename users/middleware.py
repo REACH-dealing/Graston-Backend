@@ -2,7 +2,7 @@ import jwt
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
 from rest_framework import status
-from django.http import JsonResponse
+# from django.http import JsonResponse
 from users.models import User
 import Graston.settings
 
@@ -38,7 +38,7 @@ class AuthenticationMiddleware(MiddlewareMixin):
         if payload["refresh"] == True:
             return AuthenticationFailed({"detail": "This is refresh token, you must send access token!"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        user = User.objects.filter(id=payload["id"]).first()
+        user = User.objects.filter(id=payload["user_id"]).first()
         if not user:
             return NotAuthenticated({"detail": "Unauthenticated!"}, status=status.HTTP_401_UNAUTHORIZED)
 

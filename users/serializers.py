@@ -58,85 +58,85 @@ class UserLoginSerializer(serializers.ModelSerializer):
         fields = ['email', 'password']
 
 
-class PatientSerializer(serializers.ModelSerializer):
-    """
-    Serializer for patient model
-    """
-    
-    class Meta:
-        model = Patient
-        fields = [
-            "user",
-            "profile_image",
-            "chronic_diseases",
-            "medical_report",
-        ]
-
-
-class NurseSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Nurse model
-    """
-    
-    class Meta:
-        model = Nurse
-        fields = [
-            "user",
-            "profile_image",
-            "specialization",
-            "certificates",
-            "medical_accreditations",
-            "available_working_hours"
-        ]
-
-
-class AdminSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Admin model
-    """
-    
-    class Meta:
-        model = Admin
-        fields = ["user"]
-
-
-# class AbstractSessionSerializer(serializers.ModelSerializer):
+# class PatientSerializer(serializers.ModelSerializer):
 #     """
-#     Serializer for AbstractSession model.
+#     Serializer for patient model
 #     """
-
+    
 #     class Meta:
-#         model = AbstractSession
+#         model = Patient
 #         fields = [
-#             "id",
-#             "session_type",
-#             "price",
+#             "user",
+#             "profile_image",
+#             "chronic_diseases",
+#             "medical_report",
 #         ]
 
 
-# class SessionSerializer(serializers.ModelSerializer):
+# class NurseSerializer(serializers.ModelSerializer):
 #     """
-#     Serializer for Session model.
+#     Serializer for Nurse model
 #     """
-
+    
 #     class Meta:
-#         model = Session
+#         model = Nurse
 #         fields = [
-#             "id",
-#             "session_type",
-#             "price",
-#             "patient",
-#             "nurse",
-#             "paid_price",
-#             "total_sessions",
-#             "remaining_sessions",
-#             "prev_session",
-#             "next_session",
-#             "place",
-#             "start_time",
-#             "end_time",
+#             "user",
+#             "profile_image",
+#             "specialization",
+#             "certificates",
+#             "medical_accreditations",
+#             "available_working_hours"
 #         ]
-#         extra_kwargs = {
-#             "session_type": {"read_only": True},
-#             "price": {"read_only": True},
-#         }
+
+
+# class AdminSerializer(serializers.ModelSerializer):
+#     """
+#     Serializer for Admin model
+#     """
+    
+#     class Meta:
+#         model = Admin
+#         fields = ["user"]
+
+
+# # class AbstractSessionSerializer(serializers.ModelSerializer):
+# #     """
+# #     Serializer for AbstractSession model.
+# #     """
+
+# #     class Meta:
+# #         model = AbstractSession
+# #         fields = [
+# #             "id",
+# #             "session_type",
+# #             "price",
+# #         ]
+
+
+# # class SessionSerializer(serializers.ModelSerializer):
+# #     """
+# #     Serializer for Session model.
+# #     """
+
+# #     class Meta:
+# #         model = Session
+# #         fields = [
+# #             "id",
+# #             "session_type",
+# #             "price",
+# #             "patient",
+# #             "nurse",
+# #             "paid_price",
+# #             "total_sessions",
+# #             "remaining_sessions",
+# #             "prev_session",
+# #             "next_session",
+# #             "place",
+# #             "start_time",
+# #             "end_time",
+# #         ]
+# #         extra_kwargs = {
+# #             "session_type": {"read_only": True},
+# #             "price": {"read_only": True},
+# #         }

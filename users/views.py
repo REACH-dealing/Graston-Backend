@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, renderer_classes
 from django.core.mail import send_mail
 from rest_framework.exceptions import AuthenticationFailed
 from django.http import JsonResponse
-from .serializers import UserRegisterSerializer, UserLoginSerializer, UserNoDataSerializer
+from .serializers import UserRegisterSerializer, UserLoginSerializer, UserNoDataSerializer, UserSerializer
 from .models import User
 import jwt, datetime
 from rest_framework import status
@@ -24,7 +24,7 @@ class RegisterView(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         user_data = serializer.data
-        return Response({"detail": "Activate your accout"})
+        return Response({"Register Success": "Activate your accout"})
 
 
 def get_tokens(user):
@@ -43,7 +43,7 @@ def get_tokens(user):
         "refresh": True,
     }
 
-    # remember to search about best encoding algorithm
+    # remember to search about best encoding algorithm & add the algorithm name to .env file
     access_token = jwt.encode(access_payload, SECRET_KEY, algorithm="HS256")
     refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
 
@@ -144,7 +144,7 @@ class UserView(viewsets.ModelViewSet):
     """
 
     queryset = User.objects.all()
-    serializer_class = UserRegisterSerializer
+    serializer_class = UserSerializer
 
     def retrieve(self, request):
         """

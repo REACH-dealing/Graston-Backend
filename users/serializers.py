@@ -18,12 +18,14 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "password",
+            "phone_number",
             "identity",
             "gender",
             "location",
             "city",
             "country",
             "date_of_birth",
+            "nationality",
         ]
         extra_kwargs = {
             "password": {"required": True, "write_only": True},
@@ -60,6 +62,33 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         #     instance.set_password(password)
         # instance.save()
         # return instance
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User.
+    """
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "national_id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "identity",
+            "gender",
+            "location",
+            "city",
+            "country",
+            "date_of_birth",
+            "nationality",
+            "bio",
+            "profile_image",
+        ]
 
 
 class UserLoginSerializer(serializers.ModelSerializer):

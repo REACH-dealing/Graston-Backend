@@ -37,14 +37,18 @@ class VerifyEmail(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserNoDataSerializer
 
-    def send_code2email(self, request, email):
+    def send_otp2email(self, request, email):
         """
-        send code number to Email.
+        send otp number to Email.
         """
-        global code
-        code = random.randint(1000, 9999)
+        try:
+            user = User.objects.filter(email=email).first()
+        except:
+            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+        user.otp = random.randint(1000, 9999)
+        user.save()
         # Load the HTML content from a template file
-        html_content = render_to_string('verification_email.html', {'code': code})
+        html_content = render_to_string('verification_email.html', {'otp': user.otp})
         plain_message = strip_tags(html_content)  # Fallback for plain-text email
 
         try:
@@ -56,27 +60,27 @@ class VerifyEmail(viewsets.ModelViewSet):
                 html_message=html_content,
                 fail_silently=False,
             )
-            return Response(f"We sent a code number to your email: {email}")
+            return Response(f"We sent a otp number to your email: {email}")
 
         except Exception as e:
             return Response(e)
 
-    def verify_email(self, request, code_number, user_id):
+    def verify_email(self, request, otp_number, email):
         """
-        check that code number is correct.
+        check that otp number is correct.
         """
-        if code_number == code:
-            try:
-                user = User.objects.filter(id=user_id).first()
-                user.is_verified = True
-                user.save()
-                return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
+        try:
+            user = User.objects.filter(email=email).first()
+        except Exception:
+            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
-            except Exception:
-                return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+        if otp_number == user.otp:
+            user.is_verified = True
+            user.save()
+            return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
 
         else:
-            return Response("Code is not correct", status=status.HTTP_400_BAD_REQUEST)
+            return Response("otp is not correct", status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_tokens(user):

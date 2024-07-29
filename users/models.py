@@ -41,6 +41,8 @@ class User(AbstractUser):
     date_of_birth = models.DateField(blank=True)
     profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
     is_verified = models.BooleanField(default=False)
+    otp = models.PositiveIntegerField(blank=True, null=True)
+    otp_expiry = models.DateTimeField(blank=True, null=True)
 
 
     last_login = None

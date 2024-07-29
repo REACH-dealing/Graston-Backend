@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 import random
 
+
 class RegisterView(viewsets.ModelViewSet):
     """
     Create a new user.
@@ -46,25 +47,34 @@ class VerifyEmail(viewsets.ModelViewSet):
         html_content = render_to_string('verification_email.html', {'code': code})
         plain_message = strip_tags(html_content)  # Fallback for plain-text email
 
-        send_mail(
-            subject="Activate your Graston account",
-            message=plain_message,
-            from_email=None,
-            recipient_list=[email],
-            html_message=html_content,
-            fail_silently=False,
-        )
-        return Response(f"We sent a code number to your email: {email}")
+        try:
+            send_mail(
+                subject="Activate your Graston account",
+                message=plain_message,
+                from_email=None,
+                recipient_list=[email],
+                html_message=html_content,
+                fail_silently=False,
+            )
+            return Response(f"We sent a code number to your email: {email}")
+
+        except Exception as e:
+            return Response(e)
 
     def verify_email(self, request, code_number, user_id):
         """
         check that code number is correct.
         """
         if code_number == code:
-            user = User.objects.filter(id=user_id).first()
-            user.is_verified = True
-            user.save()
-            return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
+            try:
+                user = User.objects.filter(id=user_id).first()
+                user.is_verified = True
+                user.save()
+                return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
+
+            except Exception:
+                return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+
         else:
             return Response("Code is not correct", status=status.HTTP_400_BAD_REQUEST)
 

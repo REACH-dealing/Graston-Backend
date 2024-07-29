@@ -6,11 +6,14 @@ from rest_framework import status
 from users.models import User
 from Graston.settings import SECRET_KEY
 
+
 class AuthenticationMiddleware(MiddlewareMixin):
     EXEMPT_PATHS = [
         "/auth/register/",
         "/auth/login/",
         "/auth/refresh-token/",
+        "/auth/send-code2email/",
+        "/auth/verify-email/",
         "/api/schema/",
         "/api/schema/swagger-ui/",
         "/api/schema/redoc/",

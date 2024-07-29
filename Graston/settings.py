@@ -60,7 +60,7 @@ ROOT_URLCONF = "Graston.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR/"templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -151,8 +151,14 @@ MEDIA_URL = "media/"
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ALL_ORIGINS = True
+CORS_ALLOWED_CREDENTIALS = True
+
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-idx-django-workspace-1721820460889.cluster-6yqpn75caneccvva7hjo4uejgk.cloudworkstations.dev'
+    'https://8000-idx-django-workspace-1721820460889.cluster-6yqpn75caneccvva7hjo4uejgk.cloudworkstations.dev', 
+    'https://f3b7-197-42-1-151.ngrok-free.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
 ]
 
 REST_FRAMEWORK = {
@@ -161,7 +167,7 @@ REST_FRAMEWORK = {
 
 # Spectacular settings for api auto documentation
 SPECTACULAR_SETTINGS = {
-    "TITLE": "THAMARAT API",
+    "TITLE": "Graston API",
     "DESCRIPTION": "This is swagger interactive API documentation",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
@@ -171,5 +177,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'sender@gmail.com'
-EMAIL_HOST_PASSWORD = 'google app passwords'
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") # 'google app passwords'

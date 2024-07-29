@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .code {
+            font-size: 1.5em;
+            color: #007BFF;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Activate Your Graston Account</h2>
+        <p>Thank you for registering with us! To complete the registration process, please enter the following verification code in the app:</p>
+        <p class="code">{{ code }}</p>
+        <p>If you didn't request this, please ignore this email.</p>
+        <div class="footer">
+            <p>Best regards,</p>
+            <p>Graston</p>
+        </div>
+    </div>
+</body>
+</html>

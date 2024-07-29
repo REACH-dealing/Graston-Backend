@@ -1,15 +1,17 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes
-from django.core.mail import send_mail
 from rest_framework.exceptions import AuthenticationFailed
 from django.http import JsonResponse
-from .serializers import UserRegisterSerializer, UserLoginSerializer, UserNoDataSerializer, UserSerializer
+from .serializers import UserRegisterSerializer, UserLoginSerializer, UserNoDataSerializer, UserSerializer, UserEmailSerializer
 from .models import User
 import jwt, datetime
 from rest_framework import status
 from rest_framework import viewsets, pagination
 from Graston.settings import SECRET_KEY
-
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+import random
 
 class RegisterView(viewsets.ModelViewSet):
     """
@@ -23,8 +25,36 @@ class RegisterView(viewsets.ModelViewSet):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        user_data = serializer.data
         return Response({"Register Success": "Activate your accout"})
+
+
+class VerifyEmail(viewsets.ModelViewSet):
+    """
+    Verify Email.
+    """
+
+    queryset = User.objects.all()
+    serializer_class = UserEmailSerializer
+
+    def verify_email(self, request, email):
+        """
+        Verify Email.
+        """
+        code = random.randint(1000, 9999)
+
+        # Load the HTML content from a template file
+        html_content = render_to_string('verification_email.html', {'code': code})
+        plain_message = strip_tags(html_content)  # Fallback for plain-text email
+
+        send_mail(
+            subject="Activate your Graston account",
+            message=plain_message,
+            from_email=None,
+            recipient_list=[email],
+            html_message=html_content,
+            fail_silently=False,
+        )
+        return Response(f"We sent a code number to your email: {email}")
 
 
 def get_tokens(user):
@@ -275,25 +305,3 @@ class LogoutView(viewsets.ModelViewSet):
 
 #         serializer = self.get_serializer(queryset, many=True)
 #         return Response(serializer.data)
-
-
-# @api_view(["POST"])
-# def send_simple_email(request):
-#     send_mail(
-#         "Subject here",
-#         "Body text here",
-#         "sender@gmail.com",
-#         ["mostafaelzoghbeywork1@gmail.com"],
-#         fail_silently=False,
-#     )
-
-#     return Response()
-
-
-# from rest_framework_simplejwt.tokens import RefreshToken
-
-
-# class Tokens(viewsets.ModelViewSet):
-#     def post(self, request):
-#         refresh = RefreshToken
-#         return Response({"refresh": str(refresh), "access": str(refresh.access_token)})

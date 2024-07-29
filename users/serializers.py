@@ -108,6 +108,17 @@ class UserNoDataSerializer(serializers.ModelSerializer):
         model = User
         fields = []
 
+
+class UserEmailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["email"]
+        extra_kwargs = {
+            "email": {"required": True, "read_only": True},
+        }
+
+
 # class PatientSerializer(serializers.ModelSerializer):
 #     """
 #     Serializer for patient model

@@ -34,14 +34,14 @@ class VerifyEmail(viewsets.ModelViewSet):
     """
 
     queryset = User.objects.all()
-    serializer_class = UserEmailSerializer
+    serializer_class = UserNoDataSerializer
 
-    def verify_email(self, request, email):
+    def send_code2email(self, request, email):
         """
-        Verify Email.
+        send code number to Email.
         """
+        global code
         code = random.randint(1000, 9999)
-
         # Load the HTML content from a template file
         html_content = render_to_string('verification_email.html', {'code': code})
         plain_message = strip_tags(html_content)  # Fallback for plain-text email
@@ -55,6 +55,18 @@ class VerifyEmail(viewsets.ModelViewSet):
             fail_silently=False,
         )
         return Response(f"We sent a code number to your email: {email}")
+
+    def verify_email(self, request, code_number, user_id):
+        """
+        check that code number is correct.
+        """
+        if code_number == code:
+            user = User.objects.filter(id=user_id).first()
+            user.is_verified = True
+            user.save()
+            return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
+        else:
+            return Response("Code is not correct", status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_tokens(user):

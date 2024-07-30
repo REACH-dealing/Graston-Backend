@@ -29,6 +29,65 @@ class RegisterView(viewsets.ModelViewSet):
         return Response({"Register Success": "Activate your accout"})
 
 
+class VerifyPhone(viewsets.ModelViewSet):
+    """
+    Verify phone number.
+    """
+
+    queryset = User.objects.all()
+    serializer_class = UserNoDataSerializer
+
+    def verify_otp(self, request, email):
+        """
+        check that otp number is correct.
+        """
+        user = User.objects.filter(email=email).first()
+        # if user.is_verified == True:
+        #     return Response("Your account is already verified.", status=status.HTTP_400_BAD_REQUEST)
+        if user.otp != request.data.get("otp"):
+            return Response("Please enter the correct OTP", status=status.HTTP_400_BAD_REQUEST)
+        if user.otp_expiry and timezone.now() < user.otp_expiry:
+            user.is_verified = True
+            user.otp_expiry = None
+            user.max_otp_try = 3
+            user.otp_max_out = None
+            user.save()
+            return Response("Successfully verified your account", status=status.HTTP_200_OK)
+        else:
+            return Response("OTP is expired", status=status.HTTP_400_BAD_REQUEST)
+
+    def regenerate_otp(self, request, pk=None):
+        """
+        Regenerate OTP for the given user and send it to the user.
+        """
+        user = self.get_object()
+        if int(user.max_otp_try) == 0 and timezone.now() < user.otp_max_out:
+            return Response(
+                "Max OTP try reached, try after an hour",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        otp = random.randint(1000, 9999)
+        otp_expiry = timezone.now() + datetime.timedelta(minutes=10)
+        max_otp_try = int(user.max_otp_try) - 1
+
+        user.otp = otp
+        user.otp_expiry = otp_expiry
+        user.max_otp_try = max_otp_try
+        if max_otp_try == 0:
+            # Set cool down time
+            otp_max_out = timezone.now() + datetime.timedelta(hours=1)
+            user.otp_max_out = otp_max_out
+        elif max_otp_try == -1:
+            user.max_otp_try = settings.MAX_OTP_TRY
+        else:
+            user.otp_max_out = None
+            user.max_otp_try = max_otp_try
+        user.save()
+        send_otp(user.phone_number, otp)
+        return Response("Successfully generate new OTP.", status=status.HTTP_200_OK)
+
+
 class VerifyEmail(viewsets.ModelViewSet):
     """
     Verify Email.
@@ -65,7 +124,7 @@ class VerifyEmail(viewsets.ModelViewSet):
         except Exception as e:
             return Response(e)
 
-    def verify_email(self, request, otp_number, email):
+    def verify_otp(self, request, otp_number, email):
         """
         check that otp number is correct.
         """
@@ -77,7 +136,7 @@ class VerifyEmail(viewsets.ModelViewSet):
         if otp_number == user.otp:
             user.is_verified = True
             user.save()
-            return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
+            return Response("Successfully verified your account", status=status.HTTP_200_OK)
 
         else:
             return Response("otp is not correct", status=status.HTTP_400_BAD_REQUEST)

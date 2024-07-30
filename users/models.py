@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.core.validators import validate_email
 
 
 class Gender(models.TextChoices):
@@ -31,18 +32,22 @@ class User(AbstractUser):
     id = models.AutoField(primary_key=True)
     national_id = models.CharField(max_length=55, unique=True)
     identity = models.CharField(max_length=8, choices=Identity)
+    email = models.EmailField(max_length=63, unique=True, blank=True, null=True, validators=[validate_email])
+    password = models.CharField(max_length=128)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
     gender = models.CharField(max_length=8, choices=Gender, blank=True)
-    phone_number = models.CharField(max_length=20, blank=True)
-    bio = models.TextField(blank=True)
-    nationality = models.CharField(max_length=28, blank=True)
+    nationality = models.CharField(max_length=27, blank=True)
     location = models.CharField(max_length=55, blank=True)
-    city = models.CharField(max_length=28, blank=True)
-    country = models.CharField(max_length=28, blank=True)
+    city = models.CharField(max_length=27, blank=True)
+    country = models.CharField(max_length=27, blank=True)
     date_of_birth = models.DateField(blank=True)
     profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
+    bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
     otp = models.PositiveIntegerField(blank=True, null=True)
     otp_expiry = models.DateTimeField(blank=True, null=True)
+    max_otp_try = models.CharField(max_length=2, default=3)
+    otp_max_out = models.DateTimeField(blank=True, null=True)
 
 
     last_login = None

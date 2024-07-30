@@ -12,7 +12,7 @@ class AuthenticationMiddleware(MiddlewareMixin):
         "/auth/register/",
         "/auth/login/",
         "/auth/refresh-token/",
-        "/auth/send-code2email/",
+        "/auth/send-otp2email/",
         "/auth/verify-email/",
         "/api/schema/",
         "/api/schema/swagger-ui/",

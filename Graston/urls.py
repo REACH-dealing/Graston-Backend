@@ -47,7 +47,7 @@ urlpatterns = [
     path("auth/logout/", LogoutView.as_view({"post": "logout"})),
     path("auth/refresh-token/", RefreshTokenView.as_view({"post": "refresh_token"})),
     path("auth/send-otp2email/<str:email>/", VerifyEmail.as_view({"get": "send_otp2email"})),
-    path("auth/verify-email/<str:email>/<int:otp_number>/", VerifyEmail.as_view({"post": "verify_email"})),
+    path("auth/verify-email/<str:email>/<int:otp_number>/", VerifyEmail.as_view({"post": "verify_otp"})),
     path("auth/user/", UserView.as_view({"get": "retrieve"})),
     # # User end points
     # path("users/", UserViewSet.as_view({"get": "list"})),

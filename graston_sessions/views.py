@@ -9,6 +9,8 @@ from rest_framework.permissions import IsAdminUser
 from .models import Session, SessionPackage, SessionType
 from .serializers import SessionTypeSerializer, SessionPackageSerializer, SessionSerializer
 
+from django.utils import timezone
+from datetime import timedelta
 
  ############ Session Type
 
@@ -45,6 +47,8 @@ class SessionPackageCreateView(generics.CreateAPIView):
     # permission_classes = [IsAdminUser]
     serializer_class = SessionPackageSerializer
     queryset = SessionPackage.objects.all()
+
+
 
 
 class SessionPackageUpdateView(generics.UpdateAPIView):
@@ -107,8 +111,20 @@ class CancelSessionView(generics.GenericAPIView):
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
+
+
+        print(timezone.localtime(timezone.now()))
+
+        print(instance.start_time)
+
+        if timezone.localtime(timezone.now()) + timedelta(hours=4) > instance.start_time:
+            return Response(
+                {"error": "Sessions can only be cancelled at least 4 hours before the start time."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         instance.status = "cancelled"
         instance.save()
         
         return Response({"id": serializer.data["id"], "status": serializer.data["status"]}, status=status.HTTP_200_OK)
-     
+

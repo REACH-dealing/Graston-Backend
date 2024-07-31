@@ -16,8 +16,8 @@ class SessionType(models.Model):
 
 
 class SessionPackage(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    nurse = models.ForeignKey(Nurse, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, blank=None, null=True)
+    nurse = models.ForeignKey(Nurse, on_delete=models.CASCADE, blank=None, null=True)
 
     session_type = models.ForeignKey(SessionType, on_delete=models.CASCADE)
 

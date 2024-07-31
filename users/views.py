@@ -61,7 +61,7 @@ class VerifyAccount(viewsets.ModelViewSet):
             and datetime.datetime.now(datetime.UTC) < user.otp_max_out
         ):
             return Response(
-                "Max OTP try reached, try after an hour",
+                "Max OTP try reached, try after a three minutes",
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -71,8 +71,9 @@ class VerifyAccount(viewsets.ModelViewSet):
         )
         user.otp_max_try = user.otp_max_try - 1
         if user.otp_max_try == 0:
+            # Remember to edit max out to one hour
             user.otp_max_out = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
-                hours=1
+                minutes=3
             )
 
         elif user.otp_max_try == -1:

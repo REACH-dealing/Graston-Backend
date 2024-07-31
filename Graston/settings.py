@@ -158,6 +158,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://8000-idx-django-workspace-1721820460889.cluster-6yqpn75caneccvva7hjo4uejgk.cloudworkstations.dev', 
     'https://f3b7-197-42-1-151.ngrok-free.app',
     'http://localhost:8000',
+    'http://localhost:3000',
     'http://127.0.0.1:8000',
 ]
 

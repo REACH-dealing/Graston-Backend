@@ -1,6 +1,5 @@
 import jwt
 from django.utils.deprecation import MiddlewareMixin
-from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
 from django.http import JsonResponse
 from rest_framework import status
 from users.models import User
@@ -29,22 +28,34 @@ class AuthenticationMiddleware(MiddlewareMixin):
         token = request.headers.get("Authorization") or request.COOKIES.get("access")
 
         if not token:
-            return JsonResponse({"detail": "There is no access token"})
+            return JsonResponse(
+                {"detail": "There is no access token"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
 
         except jwt.ExpiredSignatureError:
-            return JsonResponse({"detail": "Token is expired!"})
+            return JsonResponse(
+                {"detail": "Token is expired!"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
         except jwt.exceptions.DecodeError as identifier:
-            return JsonResponse({'error': 'Invalid token'})
-        
+            return JsonResponse(
+                {"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         if payload["refresh"] == True:
-            return JsonResponse({"detail": "This is refresh token, you must send access token!"})
+            return JsonResponse(
+                {"detail": "This is refresh token, you must send access token!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         user = User.objects.filter(id=payload["user_id"]).first()
         if not user:
-            return JsonResponse({"detail": "Unauthenticated!"})
+            return JsonResponse(
+                {"detail": "Unauthenticated!"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
         request.user = user

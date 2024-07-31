@@ -2,15 +2,21 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.exceptions import AuthenticationFailed
 from django.http import JsonResponse
-from .serializers import UserRegisterSerializer, UserLoginSerializer, UserNoDataSerializer, UserSerializer, UserEmailSerializer
+from .serializers import (
+    UserRegisterSerializer,
+    UserLoginSerializer,
+    UserNoDataSerializer,
+    UserSerializer,
+    OTPSerializer,
+)
 from .models import User
-import jwt, datetime
 from rest_framework import status
 from rest_framework import viewsets, pagination
 from Graston.settings import SECRET_KEY
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+import jwt, datetime
 import random
 
 
@@ -29,85 +35,76 @@ class RegisterView(viewsets.ModelViewSet):
         return Response({"Register Success": "Activate your accout"})
 
 
-class VerifyPhone(viewsets.ModelViewSet):
+class VerifyAccount(viewsets.ModelViewSet):
     """
-    Verify phone number.
+    Verify Account.
     """
 
     queryset = User.objects.all()
-    serializer_class = UserNoDataSerializer
+    serializer_class = OTPSerializer
 
-    def verify_otp(self, request, email):
+    def regenerate_otp(self, request, email):
         """
-        check that otp number is correct.
+        Regenerate OTP for the given user.
         """
-        user = User.objects.filter(email=email).first()
-        # if user.is_verified == True:
-        #     return Response("Your account is already verified.", status=status.HTTP_400_BAD_REQUEST)
-        if user.otp != request.data.get("otp"):
-            return Response("Please enter the correct OTP", status=status.HTTP_400_BAD_REQUEST)
-        if user.otp_expiry and timezone.now() < user.otp_expiry:
-            user.is_verified = True
-            user.otp_expiry = None
-            user.max_otp_try = 3
-            user.otp_max_out = None
-            user.save()
-            return Response("Successfully verified your account", status=status.HTTP_200_OK)
-        else:
-            return Response("OTP is expired", status=status.HTTP_400_BAD_REQUEST)
 
-    def regenerate_otp(self, request, pk=None):
-        """
-        Regenerate OTP for the given user and send it to the user.
-        """
-        user = self.get_object()
-        if int(user.max_otp_try) == 0 and timezone.now() < user.otp_max_out:
+        try:
+            user = User.objects.filter(email=email).first()
+        except:
+            return Response(
+                "Enter your correct email you used to register",
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if (
+            user.otp_max_try == 0
+            and datetime.datetime.now(datetime.UTC) < user.otp_max_out
+        ):
             return Response(
                 "Max OTP try reached, try after an hour",
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        otp = random.randint(1000, 9999)
-        otp_expiry = timezone.now() + datetime.timedelta(minutes=10)
-        max_otp_try = int(user.max_otp_try) - 1
+        user.otp = random.randint(1000, 9999)
+        user.otp_expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
+            minutes=2
+        )
+        user.otp_max_try = user.otp_max_try - 1
+        if user.otp_max_try == 0:
+            user.otp_max_out = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
+                hours=1
+            )
 
-        user.otp = otp
-        user.otp_expiry = otp_expiry
-        user.max_otp_try = max_otp_try
-        if max_otp_try == 0:
-            # Set cool down time
-            otp_max_out = timezone.now() + datetime.timedelta(hours=1)
-            user.otp_max_out = otp_max_out
-        elif max_otp_try == -1:
-            user.max_otp_try = settings.MAX_OTP_TRY
+        elif user.otp_max_try == -1:
+            user.otp_max_try = 3
+
         else:
             user.otp_max_out = None
-            user.max_otp_try = max_otp_try
+            # user.otp_max_try = user.otp_max_try
+
         user.save()
-        send_otp(user.phone_number, otp)
-        return Response("Successfully generate new OTP.", status=status.HTTP_200_OK)
+        # send_otp(user.phone_number, user.otp)
 
-
-class VerifyEmail(viewsets.ModelViewSet):
-    """
-    Verify Email.
-    """
-
-    queryset = User.objects.all()
-    serializer_class = UserNoDataSerializer
+        # return Response("Successfully generate new OTP.", status=status.HTTP_200_OK)
 
     def send_otp2email(self, request, email):
         """
         send otp number to Email.
         """
+        response = self.regenerate_otp(request, email)
+        if response is not None:
+            return response
+
         try:
             user = User.objects.filter(email=email).first()
         except:
-            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
-        user.otp = random.randint(1000, 9999)
-        user.save()
+            return Response(
+                "Enter your correct email you used to register",
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         # Load the HTML content from a template file
-        html_content = render_to_string('verification_email.html', {'otp': user.otp})
+        html_content = render_to_string("verification_email.html", {"otp": user.otp})
         plain_message = strip_tags(html_content)  # Fallback for plain-text email
 
         try:
@@ -119,42 +116,56 @@ class VerifyEmail(viewsets.ModelViewSet):
                 html_message=html_content,
                 fail_silently=False,
             )
-            return Response(f"We sent a otp number to your email: {email}")
+            return Response(f"We sent otp number to your email: {email}")
 
         except Exception as e:
             return Response(e)
 
-    def verify_otp(self, request, otp_number, email):
+    def verify_otp(self, request, email):
         """
         check that otp number is correct.
         """
+
         try:
             user = User.objects.filter(email=email).first()
-        except Exception:
-            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(
+                "Enter your correct email you used to register",
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
-        if otp_number == user.otp:
+        # if user.is_verified == True:
+        #     return Response("Your account is already verified.", status=status.HTTP_400_BAD_REQUEST)
+        if user.otp != request.data.get("otp"):
+            return Response(
+                "Please enter the correct OTP", status=status.HTTP_400_BAD_REQUEST
+            )
+        if user.otp_expiry and datetime.datetime.now(datetime.UTC) < user.otp_expiry:
             user.is_verified = True
+            user.otp_expiry = None
+            user.otp_max_try = 3
+            user.otp_max_out = None
             user.save()
-            return Response("Successfully verified your account", status=status.HTTP_200_OK)
-
+            return Response(
+                "Successfully verified your account", status=status.HTTP_200_OK
+            )
         else:
-            return Response("otp is not correct", status=status.HTTP_400_BAD_REQUEST)
+            return Response("OTP is expired", status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_tokens(user):
 
     access_payload = {
         "user_id": user.id,
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=61),
-        "iat": datetime.datetime.utcnow(),
+        "exp": datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=61),
+        "iat": datetime.datetime.now(datetime.UTC),
         "refresh": False,
     }
 
     refresh_payload = {
         "user_id": user.id,
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=70),
-        "iat": datetime.datetime.utcnow(),
+        "exp": datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=70),
+        "iat": datetime.datetime.now(datetime.UTC),
         "refresh": True,
     }
 
@@ -236,10 +247,12 @@ class RefreshTokenView(viewsets.ModelViewSet):
             return JsonResponse({"detail": "Token is expired!"})
 
         except jwt.exceptions.DecodeError as identifier:
-            return JsonResponse({'error': 'Invalid token'})
+            return JsonResponse({"error": "Invalid token"})
 
         if payload["refresh"] == False:
-            return JsonResponse({"detail": "This is not refresh token, you must send refresh token!"})
+            return JsonResponse(
+                {"detail": "This is not refresh token, you must send refresh token!"}
+            )
 
         user = User.objects.filter(id=payload["user_id"]).first()
         if not user:

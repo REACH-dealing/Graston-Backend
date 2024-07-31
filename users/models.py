@@ -32,7 +32,9 @@ class User(AbstractUser):
     id = models.AutoField(primary_key=True)
     national_id = models.CharField(max_length=55, unique=True)
     identity = models.CharField(max_length=8, choices=Identity)
-    email = models.EmailField(max_length=63, unique=True, blank=True, null=True, validators=[validate_email])
+    email = models.EmailField(
+        max_length=63, blank=True, null=True, validators=[validate_email]
+    )
     password = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     gender = models.CharField(max_length=8, choices=Gender, blank=True)
@@ -41,14 +43,15 @@ class User(AbstractUser):
     city = models.CharField(max_length=27, blank=True)
     country = models.CharField(max_length=27, blank=True)
     date_of_birth = models.DateField(blank=True)
-    profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
+    profile_image = models.ImageField(
+        upload_to="profile_images/", blank=True, null=True
+    )
     bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
-    otp = models.PositiveIntegerField(blank=True, null=True)
+    otp = models.SmallIntegerField(blank=True, null=True)
+    otp_max_try = models.SmallIntegerField(default=3)
     otp_expiry = models.DateTimeField(blank=True, null=True)
-    max_otp_try = models.CharField(max_length=2, default=3)
     otp_max_out = models.DateTimeField(blank=True, null=True)
-
 
     last_login = None
     groups = None
@@ -65,15 +68,17 @@ class User(AbstractUser):
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     chronic_diseases = models.CharField(max_length=255, blank=True, null=True)
-    medical_report = models.FileField(upload_to='reports/', blank=True, null=True)
+    medical_report = models.FileField(upload_to="reports/", blank=True, null=True)
 
 
 # remember to handle working hours field
 class Nurse(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     specialization = models.CharField(max_length=100, blank=True, null=True)
-    certificates = models.FileField(upload_to='certificates/', blank=True, null=True)
-    medical_accreditations = models.FileField(upload_to='accreditations/', blank=True, null=True)
+    certificates = models.FileField(upload_to="certificates/", blank=True, null=True)
+    medical_accreditations = models.FileField(
+        upload_to="accreditations/", blank=True, null=True
+    )
     available_working_hours = models.CharField(max_length=255, blank=True, null=True)
 
 

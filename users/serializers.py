@@ -109,14 +109,11 @@ class UserNoDataSerializer(serializers.ModelSerializer):
         fields = []
 
 
-class UserEmailSerializer(serializers.ModelSerializer):
+class OTPSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email"]
-        extra_kwargs = {
-            "email": {"required": True, "read_only": True},
-        }
+        fields = ["otp"]
 
 
 # class PatientSerializer(serializers.ModelSerializer):

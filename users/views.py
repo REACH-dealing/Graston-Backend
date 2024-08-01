@@ -97,8 +97,6 @@ class VerifyAccount(viewsets.ModelViewSet):
         # except:
         #     return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
-        
-
     def send_otp2email(self, request, user_id):
         """
         send otp number to Email.
@@ -389,3 +387,17 @@ class LogoutView(viewsets.ModelViewSet):
 
 #         serializer = self.get_serializer(queryset, many=True)
 #         return Response(serializer.data)
+
+# 0) patient registration
+# 0) nurse registration
+
+
+# 1) delete account (soft delete)
+# 2) activate account ()
+# 3) get patient or nurse data
+# 4) update patient or nurse data:
+#       A@password change@ -send old and new password-,
+#       B@email change@ -send password and verify email-,
+#       C@phone number change@ -send password and verify phone-,
+#       D@other data change@ -send password and new data-
+#   NOTE: no identity Update

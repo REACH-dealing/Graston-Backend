@@ -44,7 +44,7 @@ class User(AbstractUser):
     country = models.CharField(max_length=27, blank=True)
     date_of_birth = models.DateField(blank=True)
     profile_image = models.ImageField(
-        upload_to="profile_images/", blank=True, null=True
+        upload_to="media/profile_images/", blank=True, null=True
     )
     bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)

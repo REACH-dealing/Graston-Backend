@@ -12,10 +12,11 @@ from .serializers import (
 from .models import User
 from rest_framework import status
 from rest_framework import viewsets, pagination
-from Graston.settings import SECRET_KEY
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from Graston.settings import SECRET_KEY
+from .utils import get_tokens
 import jwt, datetime
 import random
 
@@ -152,29 +153,6 @@ class VerifyAccount(viewsets.ModelViewSet):
             )
         else:
             return Response("OTP is expired", status=status.HTTP_400_BAD_REQUEST)
-
-
-def get_tokens(user):
-
-    access_payload = {
-        "user_id": user.id,
-        "exp": datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=61),
-        "iat": datetime.datetime.now(datetime.UTC),
-        "refresh": False,
-    }
-
-    refresh_payload = {
-        "user_id": user.id,
-        "exp": datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=70),
-        "iat": datetime.datetime.now(datetime.UTC),
-        "refresh": True,
-    }
-
-    # remember to search about best encoding algorithm & add the algorithm name to .env file
-    access_token = jwt.encode(access_payload, SECRET_KEY, algorithm="HS256")
-    refresh_token = jwt.encode(refresh_payload, SECRET_KEY, algorithm="HS256")
-
-    return access_token, refresh_token
 
 
 class LoginView(viewsets.ModelViewSet):

@@ -44,18 +44,15 @@ class VerifyAccount(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = OTPSerializer
 
-    def regenerate_otp(self, request, email):
+    def regenerate_otp(self, request, user_id):
         """
         Regenerate OTP for the given user.
         """
 
         try:
-            user = User.objects.filter(email=email).first()
+            user = User.objects.filter(id=user_id).first()
         except:
-            return Response(
-                "Enter your correct email you used to register",
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
         if (
             user.otp_max_try == 0
@@ -85,25 +82,35 @@ class VerifyAccount(viewsets.ModelViewSet):
             # user.otp_max_try = user.otp_max_try
 
         user.save()
-        # send_otp(user.phone_number, user.otp)
 
-        # return Response("Successfully generate new OTP.", status=status.HTTP_200_OK)
+    def send_otp2phone(self, request, user_id):
+        pass
+        # """
+        # send otp number to Phone.
+        # """
+        # response = self.regenerate_otp(request, user_id)
+        # if response is not None:
+        #     return response
 
-    def send_otp2email(self, request, email):
+        # try:
+        #     user = User.objects.filter(id=user_id).first()
+        # except:
+        #     return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+
+        
+
+    def send_otp2email(self, request, user_id):
         """
         send otp number to Email.
         """
-        response = self.regenerate_otp(request, email)
+        response = self.regenerate_otp(request, user_id)
         if response is not None:
             return response
 
         try:
-            user = User.objects.filter(email=email).first()
+            user = User.objects.filter(id=user_id).first()
         except:
-            return Response(
-                "Enter your correct email you used to register",
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
         # Load the HTML content from a template file
         html_content = render_to_string("verification_email.html", {"otp": user.otp})
@@ -114,27 +121,27 @@ class VerifyAccount(viewsets.ModelViewSet):
                 subject="Activate your Graston account",
                 message=plain_message,
                 from_email=None,
-                recipient_list=[email],
+                recipient_list=[user.email],
                 html_message=html_content,
                 fail_silently=False,
             )
-            return Response(f"We sent otp number to your email: {email}")
+            return Response(
+                f"We sent otp number to your email: {user.email}",
+                status=status.HTTP_200_OK,
+            )
 
         except Exception as e:
-            return Response(e)
+            return Response(e, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-    def verify_otp(self, request, email):
+    def verify_otp(self, request, user_id):
         """
         check that otp number is correct.
         """
 
         try:
-            user = User.objects.filter(email=email).first()
+            user = User.objects.filter(id=user_id).first()
         except:
-            return Response(
-                "Enter your correct email you used to register",
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
         # if user.is_verified == True:
         #     return Response("Your account is already verified.", status=status.HTTP_400_BAD_REQUEST)

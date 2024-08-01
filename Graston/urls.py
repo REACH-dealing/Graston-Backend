@@ -18,6 +18,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from django.conf.urls.static import static
+from Graston.settings import STATIC_ROOT, STATIC_URL
+
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -46,8 +49,8 @@ urlpatterns = [
     path("auth/login/", LoginView.as_view({"post": "login"})),
     path("auth/logout/", LogoutView.as_view({"post": "logout"})),
     path("auth/refresh-token/", RefreshTokenView.as_view({"post": "refresh_token"})),
-    path("auth/send-otp2email/<str:email>/", VerifyAccount.as_view({"get": "send_otp2email"})),
-    path("auth/verify-otp/<str:email>/", VerifyAccount.as_view({"post": "verify_otp"})),
+    path("auth/send-otp2email/<int:user_id>/", VerifyAccount.as_view({"get": "send_otp2email"})),
+    path("auth/verify-otp/<int:user_id>/", VerifyAccount.as_view({"post": "verify_otp"})),
     path("auth/user/", UserView.as_view({"get": "retrieve"})),
     # # User end points
     # path("users/", UserViewSet.as_view({"get": "list"})),
@@ -57,3 +60,5 @@ urlpatterns = [
     # ),
     # path("users/search/<str:string>/", UserSearch.as_view({"get": "list"})),
 ]
+
+urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

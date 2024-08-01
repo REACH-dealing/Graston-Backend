@@ -82,16 +82,16 @@ WSGI_APPLICATION = "Graston.wsgi.application"
 from dotenv import load_dotenv
 load_dotenv()
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ.get("POSTGRES_DATABASE"),
-        "USER": os.environ.get("POSTGRES_USER"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_HOST"),
-        "PORT": os.environ.get("5432"),
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "NAME": os.environ.get("POSTGRES_DATABASE"),
+#         "USER": os.environ.get("POSTGRES_USER"),
+#         "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+#         "HOST": os.environ.get("POSTGRES_HOST"),
+#         "PORT": os.environ.get("5432"),
+#     }
+# }
 
 # DATABASES = {
 #     "default": {
@@ -104,11 +104,12 @@ DATABASES = {
 #     }
 # }
 
-# DATABASES = {
-#     "default": dj_database_url.parse(
-#         "postgresql://books_platform_m1b6_user:g5mAd9mQKlKu9bjkiOLG02unpFvSk2FB@dpg-cpr1b5rv2p9s739vmig0-a.oregon-postgres.render.com/books_platform_m1b6"
-#     )
-# }
+DATABASES = {
+    "default": dj_database_url.config(
+        default = "postgresql://books_platform_m1b6_user:g5mAd9mQKlKu9bjkiOLG02unpFvSk2FB@dpg-cpr1b5rv2p9s739vmig0-a.oregon-postgres.render.com/books_platform_m1b6",
+        conn_max_age = 600
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

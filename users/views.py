@@ -12,13 +12,9 @@ from .serializers import (
 from .models import User
 from rest_framework import status
 from rest_framework import viewsets, pagination
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from Graston.settings import SECRET_KEY
-from .utils import get_tokens
 import jwt, datetime
-import random
+from Graston.settings import SECRET_KEY
+from .utils import get_tokens, regenerate_otp, send_otp2email_util
 
 
 class RegisterView(viewsets.ModelViewSet):
@@ -44,45 +40,6 @@ class VerifyAccount(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = OTPSerializer
 
-    def regenerate_otp(self, request, user_id):
-        """
-        Regenerate OTP for the given user.
-        """
-
-        try:
-            user = User.objects.filter(id=user_id).first()
-        except:
-            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
-
-        if (
-            user.otp_max_try == 0
-            and datetime.datetime.now(datetime.UTC) < user.otp_max_out
-        ):
-            return Response(
-                "Max OTP try reached, try after a three minutes",
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        user.otp = random.randint(1000, 9999)
-        user.otp_expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
-            minutes=2
-        )
-        user.otp_max_try = user.otp_max_try - 1
-        if user.otp_max_try == 0:
-            # Remember to edit max out to one hour
-            user.otp_max_out = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
-                minutes=3
-            )
-
-        elif user.otp_max_try == -1:
-            user.otp_max_try = 3
-
-        else:
-            user.otp_max_out = None
-            # user.otp_max_try = user.otp_max_try
-
-        user.save()
-
     def send_otp2phone(self, request, user_id):
         pass
         # """
@@ -92,16 +49,13 @@ class VerifyAccount(viewsets.ModelViewSet):
         # if response is not None:
         #     return response
 
-        # try:
-        #     user = User.objects.filter(id=user_id).first()
-        # except:
-        #     return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+        # return send_otp2phone_util(user_id, "verification_email.html")
 
     def send_otp2email(self, request, user_id):
         """
         send otp number to Email.
         """
-        response = self.regenerate_otp(request, user_id)
+        response = regenerate_otp(user_id)
         if response is not None:
             return response
 
@@ -110,26 +64,7 @@ class VerifyAccount(viewsets.ModelViewSet):
         except:
             return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
-        # Load the HTML content from a template file
-        html_content = render_to_string("verification_email.html", {"otp": user.otp})
-        plain_message = strip_tags(html_content)  # Fallback for plain-text email
-
-        try:
-            send_mail(
-                subject="Activate your Graston account",
-                message=plain_message,
-                from_email=None,
-                recipient_list=[user.email],
-                html_message=html_content,
-                fail_silently=False,
-            )
-            return Response(
-                f"We sent otp number to your email: {user.email}",
-                status=status.HTTP_200_OK,
-            )
-
-        except Exception as e:
-            return Response(e, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        return send_otp2email_util(user_id, user, "verification_email.html")
 
     def verify_otp(self, request, user_id):
         """

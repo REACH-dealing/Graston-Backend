@@ -2,6 +2,9 @@ from rest_framework import serializers
 from django.db import transaction
 from .models import User, Patient, Nurse, Admin, VerificationRequests
 
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth import password_validation
+
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     """
@@ -112,7 +115,7 @@ class UserNoDataSerializer(serializers.ModelSerializer):
 class OTPSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
+        model = VerificationRequests
         fields = ["otp"]
 
 

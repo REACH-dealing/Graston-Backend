@@ -200,6 +200,40 @@ class OTPSerializer(serializers.ModelSerializer):
 # #         }
 
 
+
+class PatientSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Patient
+        fields = ('user', 'chronic_diseases', 'medical_report')
+
+
+class NurseSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Nurse
+        fields = ('user', 'specialization', 'certificates', 'medical_accreditations', 'available_working_hours')
+
+    
+class PasswordChangeSerializer(serializers.Serializer):
+    current_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate_current_password(self, value):
+        user = self.context['request'].user
+        if not check_password(value, user.password):
+            raise serializers.ValidationError("Current password is incorrect.")
+        return value
+
+    def validate_new_password(self, value):
+        password_validation.validate_password(value)
+        return value
+    
+class PasswordVerificationSerializer(serializers.Serializer):
+    password = serializers.CharField(required=True)
+
 class VerifcationRequestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = VerificationRequests

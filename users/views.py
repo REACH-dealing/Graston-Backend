@@ -8,9 +8,14 @@ from .serializers import (
     UserNoDataSerializer,
     UserSerializer,
     OTPSerializer,
+    PasswordChangeSerializer,
+    PasswordVerificationSerializer,
+    PatientSerializer,
+    NurseSerializer,
+
 )
-from .models import User, VerificationRequests
-from rest_framework import status
+from .models import User, VerificationRequests, Patient, Nurse
+from rest_framework import status, generics
 from rest_framework import viewsets, pagination
 import jwt, datetime
 from Graston.settings import SECRET_KEY
@@ -344,3 +349,63 @@ class LogoutView(viewsets.ModelViewSet):
 #       C@phone number change@ -send password and verify phone-,
 #       D@other data change@ -send password and new data-
 #   NOTE: no identity Update
+
+
+class SoftDeleteAccountView(generics.DestroyAPIView):
+    queryset = User.objects.filter(is_active=True)
+    
+
+    def delete(self, request, *args, **kwargs):
+        user = self.get_object()
+        user.is_active = False
+        user.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+class RectivateAccountView(generics.GenericAPIView):
+    queryset = User.objects.filter(is_active=False)
+    print(len(queryset))
+    def post(self, request, *args, **kwargs):
+        user = self.get_object()
+        user.is_active = True
+        user.save()
+
+        return Response({"message": "Account Reactivated"}, status=status.HTTP_200_OK)
+    
+
+class PatientDetailsView(generics.RetrieveAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
+
+class NurseDetailsView(generics.RetrieveAPIView):
+    queryset = Nurse.objects.all()
+    serializer_class = NurseSerializer
+
+
+class PasswordChangeView(generics.GenericAPIView):
+    serializer_class = PasswordChangeSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = request.user
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response({"detail": "Password has been changed."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CheckPasswordView(generics.GenericAPIView):
+    serializer_class = PasswordVerificationSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            user = request.user
+            password = serializer.validated_data["password"]
+
+            if user.check_password(password):
+                return Response({"detail": "Password is correct."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"detail": "Password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

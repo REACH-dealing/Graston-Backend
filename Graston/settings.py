@@ -106,7 +106,7 @@ load_dotenv()
 
 DATABASES = {
     "default": dj_database_url.config(
-        default = "postgres://default:qo4O9nAasNdx@ep-shy-dream-a4f5mhi5-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require",
+        default = os.environ.get("POSTGRES_URL"),
         conn_max_age = 600
     )
 }

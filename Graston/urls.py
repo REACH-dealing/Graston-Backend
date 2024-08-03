@@ -59,6 +59,15 @@ urlpatterns = [
     #     UserViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"}),
     # ),
     # path("users/search/<str:string>/", UserSearch.as_view({"get": "list"})),
+
+    path("auth/delete_account/<pk>", SoftDeleteAccountView.as_view(), name="delete_account"),
+    path("auth/reactivate_account/<pk>", RectivateAccountView.as_view(), name="reactivate_account"),
+
+    path("auth/patient/<pk>", PatientDetailsView.as_view(), name="patient_details"),
+    path("auth/nurse/<pk>", NurseDetailsView.as_view(), name="nurse_details"),
+
+    path("auth/change_password", PasswordChangeView.as_view(), name="change_password"),
+    path("auth/check_password", CheckPasswordView.as_view(), name="check_password"),
 ]
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

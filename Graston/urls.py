@@ -68,6 +68,8 @@ urlpatterns = [
 
     path("auth/change_password", PasswordChangeView.as_view(), name="change_password"),
     path("auth/check_password", CheckPasswordView.as_view(), name="check_password"),
+
+    path("auth/change_email", ChangeEmailView.as_view(), name="change_email")
 ]
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

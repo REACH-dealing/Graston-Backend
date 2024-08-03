@@ -5,6 +5,8 @@ from .models import User, Patient, Nurse, Admin, VerificationRequests
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import password_validation
 
+from django.core.validators import validate_email
+
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     """
@@ -241,3 +243,9 @@ class VerifcationRequestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = VerificationRequests
         fields = "__all__"
+
+
+        
+class EmailChangeSerializer(serializers.Serializer):
+    new_email = serializers.EmailField(max_length=63, validators=[validate_email])
+    

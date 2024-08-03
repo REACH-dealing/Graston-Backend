@@ -12,6 +12,7 @@ from .serializers import (
     PasswordVerificationSerializer,
     PatientSerializer,
     NurseSerializer,
+    EmailChangeSerializer
 
 )
 from .models import User, VerificationRequests, Patient, Nurse
@@ -98,6 +99,11 @@ class VerifyAccount(viewsets.ModelViewSet):
             instance.otp_max_try = 3
             instance.otp_max_out = None
             instance.save()
+
+            user = request.user
+            user.email = instance.email
+            user.save()
+            
             return Response(
                 "Successfully verified your account", status=status.HTTP_200_OK
             )
@@ -342,7 +348,7 @@ class LogoutView(viewsets.ModelViewSet):
 # 3) get patient or nurse data
 # 4) update patient or nurse data:
 #       A@password change@ -send old and new password-,
-#       B@emai*l change@ -send password and verify email-,
+#       B@email change@ -send password and verify email-,
 #       C@phone number change@ -send password and verify phone-,
 #       D@other data change@ -send password and new data-
 #   NOTE: no identity Update
@@ -414,3 +420,29 @@ class CheckPasswordView(generics.GenericAPIView):
             else:
                 return Response({"detail": "Password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ChangeEmailView(generics.GenericAPIView):
+    serializer_class = EmailChangeSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            user = request.user
+            new_email = serializer.validated_data["new_email"]
+
+            instance = VerificationRequests.objects.create(user=user, email=new_email)
+            
+            response, instance = regenerate_otp(instance)
+
+            if response is not None:
+                return response
+
+            return send_otp2email_util(instance, "verification_new_email.html")
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class VerifyNewEmailView(generics.GenericAPIView):
+#     serializer_class = OTPSerializer

@@ -7,53 +7,48 @@ import datetime
 import random
 import jwt
 from Graston.settings import SECRET_KEY
-from .models import User
+from .models import User, VerificationRequests
 
 
-def regenerate_otp(user_id):
+def regenerate_otp(instance):
     """
     Utility function to regenerate OTP for the given user.
     """
 
-    try:
-        user = User.objects.filter(id=user_id).first()
-    except:
-        return Response("User not found", status=status.HTTP_404_NOT_FOUND)
-
-    if user.otp_max_try == 0 and datetime.datetime.now(datetime.UTC) < user.otp_max_out:
+    if instance.otp_max_try == 0 and datetime.datetime.now(datetime.UTC) < instance.otp_max_out:
         return Response(
             "Max OTP try reached, try after a three minutes",
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    user.otp = random.randint(1000, 9999)
-    user.otp_expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
+    instance.otp = random.randint(1000, 9999)
+    instance.otp_expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
         minutes=2
     )
-    user.otp_max_try = user.otp_max_try - 1
-    if user.otp_max_try == 0:
+    instance.otp_max_try = instance.otp_max_try - 1
+    if instance.otp_max_try == 0:
         # Remember to edit max out to one hour
-        user.otp_max_out = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
+        instance.otp_max_out = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
             minutes=3
         )
 
-    elif user.otp_max_try == -1:
-        user.otp_max_try = 3
+    elif instance.otp_max_try == -1:
+        instance.otp_max_try = 3
 
     else:
-        user.otp_max_out = None
-        # user.otp_max_try = user.otp_max_try
+        instance.otp_max_out = None
+        # instance.otp_max_try = instance.otp_max_try
 
-    user.save()
+    instance.save()
 
 
-def send_otp2email_util(user_id, user, html_file_name):
+def send_otp2email_util(instance, html_file_name):
     """
     Utility function to send otp number to Email.
     """
 
     # Load the HTML content from a template file
-    html_content = render_to_string(f"{html_file_name}", {"otp": user.otp})
+    html_content = render_to_string(f"{html_file_name}", {"otp": instance.otp})
     plain_message = strip_tags(html_content)  # Fallback for plain-text email
 
     try:
@@ -61,12 +56,12 @@ def send_otp2email_util(user_id, user, html_file_name):
             subject="Activate your Graston account",
             message=plain_message,
             from_email=None,
-            recipient_list=[user.email],
+            recipient_list=[instance.email],
             html_message=html_content,
             fail_silently=False,
         )
         return Response(
-            f"We sent otp number to your email: {user.email}",
+            f"We sent otp number to your email: {instance.email}",
             status=status.HTTP_200_OK,
         )
 

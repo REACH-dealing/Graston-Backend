@@ -9,7 +9,7 @@ from .serializers import (
     UserSerializer,
     OTPSerializer,
 )
-from .models import User
+from .models import User, VerificationRequests
 from rest_framework import status
 from rest_framework import viewsets, pagination
 import jwt, datetime
@@ -55,16 +55,24 @@ class VerifyAccount(viewsets.ModelViewSet):
         """
         send otp number to Email.
         """
-        response = regenerate_otp(user_id)
+
+        try:
+            instnace = VerificationRequests.objects.create(user=user_id)
+        except:
+            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+        
+        response = regenerate_otp(instnace)
+
         if response is not None:
             return response
 
         try:
-            user = User.objects.filter(id=user_id).first()
+            instnace = VerificationRequests.objects.filter(user=user_id).order_by("-created_at").last()
         except:
             return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
-        return send_otp2email_util(user_id, user, "verification_email.html")
+
+        return send_otp2email_util(instnace, "verification_email.html")
 
     def verify_otp(self, request, user_id):
         """

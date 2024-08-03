@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db import transaction
-from .models import User, Patient, Nurse, Admin
+from .models import User, Patient, Nurse, Admin, VerificationRequests
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -198,3 +198,9 @@ class OTPSerializer(serializers.ModelSerializer):
 # #             "session_type": {"read_only": True},
 # #             "price": {"read_only": True},
 # #         }
+
+
+class VerifcationRequestsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VerificationRequests
+        fields = "__all__"

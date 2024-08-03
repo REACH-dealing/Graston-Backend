@@ -48,10 +48,7 @@ class User(AbstractUser):
     )
     bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
-    otp = models.SmallIntegerField(blank=True, null=True)
-    otp_max_try = models.SmallIntegerField(default=3)
-    otp_expiry = models.DateTimeField(blank=True, null=True)
-    otp_max_out = models.DateTimeField(blank=True, null=True)
+
 
     last_login = None
     groups = None
@@ -106,3 +103,20 @@ class Admin(models.Model):
 
 #     def __str__(self):
 #         return f"Session between {self.patient.name} and {self.nurse.name}"
+
+
+class VerificationRequests(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    email = models.EmailField(
+        max_length=63, blank=True, null=True, validators=[validate_email]
+    )
+
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+
+    otp = models.SmallIntegerField(blank=True, null=True)
+    otp_max_try = models.SmallIntegerField(default=3)
+    otp_expiry = models.DateTimeField(blank=True, null=True)
+    otp_max_out = models.DateTimeField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)

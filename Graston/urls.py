@@ -63,8 +63,8 @@ urlpatterns = [
     path("auth/delete_account/<pk>", SoftDeleteAccountView.as_view(), name="delete_account"),
     path("auth/reactivate_account/<pk>", RectivateAccountView.as_view(), name="reactivate_account"),
 
-    path("auth/patient/<pk>", PatientDetailsView.as_view(), name="patient_details"),
-    path("auth/nurse/<pk>", NurseDetailsView.as_view(), name="nurse_details"),
+    path("patient/<pk>", PatientDetailsView.as_view(), name="patient_details"),
+    path("nurse/<pk>", NurseDetailsView.as_view(), name="nurse_details"),
 
     path("auth/change_password", PasswordChangeView.as_view(), name="change_password"),
     path("auth/check_password", CheckPasswordView.as_view(), name="check_password"),

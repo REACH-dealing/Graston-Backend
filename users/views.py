@@ -354,9 +354,9 @@ class LogoutView(viewsets.ModelViewSet):
 class SoftDeleteAccountView(generics.DestroyAPIView):
     queryset = User.objects.filter(is_active=True)
     
-
     def delete(self, request, *args, **kwargs):
         user = self.get_object()
+        
         user.is_active = False
         user.save()
 
@@ -365,7 +365,7 @@ class SoftDeleteAccountView(generics.DestroyAPIView):
 
 class RectivateAccountView(generics.GenericAPIView):
     queryset = User.objects.filter(is_active=False)
-    print(len(queryset))
+    
     def post(self, request, *args, **kwargs):
         user = self.get_object()
         user.is_active = True

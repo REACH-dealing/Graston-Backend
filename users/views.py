@@ -62,22 +62,19 @@ class VerifyAccount(viewsets.ModelViewSet):
         """
 
         try:
-            instnace = VerificationRequests.objects.create(user=user_id)
+            user = User.objects.filter(id=user_id).first()
         except:
-            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+            return Response("User not found created ", status=status.HTTP_404_NOT_FOUND)
         
-        response = regenerate_otp(instnace)
+        instance = VerificationRequests.objects.create(user=user, email=user.email)
+    
+        response, instance = regenerate_otp(instance)
 
         if response is not None:
             return response
 
-        try:
-            instnace = VerificationRequests.objects.filter(user=user_id).order_by("-created_at").last()
-        except:
-            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
 
-
-        return send_otp2email_util(instnace, "verification_email.html")
+        return send_otp2email_util(instance, "verification_email.html")
 
     def verify_otp(self, request, user_id):
         """
@@ -85,22 +82,22 @@ class VerifyAccount(viewsets.ModelViewSet):
         """
 
         try:
-            user = User.objects.filter(id=user_id).first()
+            instance = VerificationRequests.objects.filter(user__id=user_id).last()
         except:
-            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+            return Response("no object matches this id", status=status.HTTP_404_NOT_FOUND)
 
         # if user.is_verified == True:
         #     return Response("Your account is already verified.", status=status.HTTP_400_BAD_REQUEST)
-        if user.otp != request.data.get("otp"):
+        if instance.otp != request.data.get("otp"):
             return Response(
                 "Please enter the correct OTP", status=status.HTTP_400_BAD_REQUEST
             )
-        if user.otp_expiry and datetime.datetime.now(datetime.UTC) < user.otp_expiry:
-            user.is_verified = True
-            user.otp_expiry = None
-            user.otp_max_try = 3
-            user.otp_max_out = None
-            user.save()
+        if instance.otp_expiry and datetime.datetime.now(datetime.UTC) < instance.otp_expiry:
+            instance.is_verified = True
+            instance.otp_expiry = None
+            instance.otp_max_try = 3
+            instance.otp_max_out = None
+            instance.save()
             return Response(
                 "Successfully verified your account", status=status.HTTP_200_OK
             )
@@ -345,7 +342,7 @@ class LogoutView(viewsets.ModelViewSet):
 # 3) get patient or nurse data
 # 4) update patient or nurse data:
 #       A@password change@ -send old and new password-,
-#       B@email change@ -send password and verify email-,
+#       B@emai*l change@ -send password and verify email-,
 #       C@phone number change@ -send password and verify phone-,
 #       D@other data change@ -send password and new data-
 #   NOTE: no identity Update

@@ -16,10 +16,10 @@ def regenerate_otp(instance):
     """
 
     if instance.otp_max_try == 0 and datetime.datetime.now(datetime.UTC) < instance.otp_max_out:
-        return Response(
+        return [Response(
             "Max OTP try reached, try after a three minutes",
             status=status.HTTP_400_BAD_REQUEST,
-        )
+        ), instance]
 
     instance.otp = random.randint(1000, 9999)
     instance.otp_expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
@@ -41,6 +41,8 @@ def regenerate_otp(instance):
 
     instance.save()
 
+    return [None, instance]
+
 
 def send_otp2email_util(instance, html_file_name):
     """
@@ -60,6 +62,8 @@ def send_otp2email_util(instance, html_file_name):
             html_message=html_content,
             fail_silently=False,
         )
+        
+
         return Response(
             f"We sent otp number to your email: {instance.email}",
             status=status.HTTP_200_OK,

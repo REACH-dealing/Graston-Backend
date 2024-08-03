@@ -378,9 +378,17 @@ class PatientDetailsView(generics.RetrieveAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
 
+    def get_object(self):
+        user_id = self.kwargs.get('pk')
+        return Patient.objects.get(user__id=user_id)
+
 class NurseDetailsView(generics.RetrieveAPIView):
     queryset = Nurse.objects.all()
     serializer_class = NurseSerializer
+
+    def get_object(self):
+        user_id = self.kwargs.get('pk')
+        return Nurse.objects.get(user__id=user_id)
 
 
 class PasswordChangeView(generics.GenericAPIView):

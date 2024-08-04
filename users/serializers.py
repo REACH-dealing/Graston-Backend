@@ -31,15 +31,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "country",
             "date_of_birth",
             "nationality",
+            "profile_image",
         ]
         extra_kwargs = {
+            "identity": {"read_only": True},
             "password": {"required": True, "write_only": True},
             "national_id": {"required": True},
             "username": {"required": True},
             "first_name": {"required": True},
             "last_name": {"required": True},
             "email": {"required": True},
-            "identity": {"required": True},
             "gender": {"required": True},
             "location": {"required": True},
             "city": {"required": True},
@@ -51,26 +52,40 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         password_validation.validate_password(value)
         return value
 
+
+class PatientRegisterSerializer(serializers.ModelSerializer):
+    user = UserRegisterSerializer()
+
+    class Meta:
+        model = Patient
+        fields = ['user', 'chronic_diseases', 'medical_report']
+
     @transaction.atomic
     def create(self, validated_data):
-        """
-        Create User.
-        """
+        user_data = validated_data.pop('user')
+        user = User.objects.create(**user_data)
+        user.set_password(user_data['password'])
+        user.identity = "P"
+        user.save()
+        patient = Patient.objects.create(user=user, **validated_data)
+        return patient
 
-        user = User.objects.create_user(**validated_data)
+class NurseRegisterSerializer(serializers.ModelSerializer):
+    user = UserRegisterSerializer()
 
-        if user.identity == "Patient" or user.identity == "P":
-            Patient.objects.create(user=user)
-        elif user.identity == "Nurse" or user.identity == "D":
-            Nurse.objects.create(user=user)
+    class Meta:
+        model = Nurse
+        fields = ['user', 'specialization', 'certificates', 'medical_accreditations', 'available_working_hours']
 
-        return user
-        # password = validated_data.pop("password", None)
-        # instance = self.Meta.model(**validated_data)
-        # if password is not None:
-        #     instance.set_password(password)
-        # instance.save()
-        # return instance
+    @transaction.atomic
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = User.objects.create(**user_data)
+        user.set_password(user_data['password'])
+        user.identity = "D"
+        user.save()
+        nurse = Nurse.objects.create(user=user, **validated_data)
+        return nurse
 
 
 class UserSerializer(serializers.ModelSerializer):

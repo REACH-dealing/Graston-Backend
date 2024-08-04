@@ -4,6 +4,8 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.http import JsonResponse
 from .serializers import (
     UserRegisterSerializer,
+    PatientRegisterSerializer,
+    NurseRegisterSerializer,
     UserLoginSerializer,
     UserNoDataSerializer,
     UserSerializer,
@@ -36,6 +38,16 @@ class RegisterView(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"Register Success": "Activate your accout"})
+
+
+class PatientRegisterView(generics.CreateAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = PatientRegisterSerializer
+
+
+class NurseRegisterView(generics.CreateAPIView):
+    queryset = Nurse.objects.all()
+    serializer_class = NurseRegisterSerializer
 
 
 class VerifyAccount(viewsets.ModelViewSet):

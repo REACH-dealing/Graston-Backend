@@ -45,7 +45,8 @@ urlpatterns = [
         name="redoc",
     ),
     # # User authentication end points
-    path("auth/register/", RegisterView.as_view({"post": "create"})),
+    path('auth/register/patient/', PatientRegisterView.as_view()),
+    path('auth/register/nurse/', NurseRegisterView.as_view()),
     path("auth/login/", LoginView.as_view({"post": "login"})),
     path("auth/logout/", LogoutView.as_view({"post": "logout"})),
     path("auth/refresh-token/", RefreshTokenView.as_view({"post": "refresh_token"})),

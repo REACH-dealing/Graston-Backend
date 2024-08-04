@@ -9,7 +9,8 @@ from Graston.settings import SECRET_KEY
 class AuthenticationMiddleware(MiddlewareMixin):
     EXEMPT_PATHS = [
         "/admin/",
-        "/auth/register/",
+        "/auth/register/patient/",
+        "/auth/register/nurse/",
         "/auth/login/",
         "/auth/refresh-token/",
         "/auth/send-otp2email/",

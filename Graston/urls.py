@@ -70,7 +70,11 @@ urlpatterns = [
     path("auth/change_password", PasswordChangeView.as_view(), name="change_password"),
     path("auth/check_password", CheckPasswordView.as_view(), name="check_password"),
 
-    path("auth/change_email", ChangeEmailView.as_view(), name="change_email")
+    path("auth/change_email", ChangeEmailView.as_view(), name="change_email"),
+
+    path("auth/forget-password", ForgetPasswordView.as_view(), name="forget_password"),
+    path("auth/forget-password-verify-otp/<int:user_id>", CheckOTPtoChangePassword.as_view(), name="verify_password_verify_otp"),
+    path("auth/confirm-forget-password/<int:user_id>", ConfirmForgetPassword.as_view(), name="confirm_forget_password"),
 ]
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

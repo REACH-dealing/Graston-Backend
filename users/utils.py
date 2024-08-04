@@ -64,10 +64,11 @@ def send_otp2email_util(instance, html_file_name):
         )
         
 
-        return Response(
-            f"We sent otp number to your email: {instance.email}",
-            status=status.HTTP_200_OK,
-        )
+        return Response({
+            "user_id": instance.user.id,
+            "message": f"We sent otp number to your email: {instance.email}",     
+        }, status=status.HTTP_200_OK,)
+        
 
     except Exception as e:
         return Response(e, status=status.HTTP_503_SERVICE_UNAVAILABLE)

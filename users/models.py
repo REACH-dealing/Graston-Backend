@@ -118,4 +118,6 @@ class VerificationRequests(models.Model):
     otp_expiry = models.DateTimeField(blank=True, null=True)
     otp_max_out = models.DateTimeField(blank=True, null=True)
 
+    otp_done = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)

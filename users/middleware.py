@@ -18,6 +18,9 @@ class AuthenticationMiddleware(MiddlewareMixin):
         "/api/schema/",
         "/api/schema/swagger-ui/",
         "/api/schema/redoc/",
+        "/auth/forget-password",
+        "/auth/forget-password-verify-otp",
+        "/auth/confirm-forget-password",
     ]
 
     def process_request(self, request):

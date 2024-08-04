@@ -14,7 +14,8 @@ from .serializers import (
     PasswordVerificationSerializer,
     PatientSerializer,
     NurseSerializer,
-    EmailSerializer
+    EmailSerializer,
+    PasswordForgetSerializer,
 
 )
 from .models import User, VerificationRequests, Patient, Nurse
@@ -106,10 +107,11 @@ class VerifyAccount(viewsets.ModelViewSet):
                 "Please enter the correct OTP", status=status.HTTP_400_BAD_REQUEST
             )
         if instance.otp_expiry and datetime.datetime.now(datetime.UTC) < instance.otp_expiry:
-            instance.is_verified = True
+            request.user.is_verified = True
             instance.otp_expiry = None
             instance.otp_max_try = 3
             instance.otp_max_out = None
+            instance.otp_done = True
             instance.save()
 
             user = request.user
@@ -435,7 +437,7 @@ class CheckPasswordView(generics.GenericAPIView):
     
 
 class ChangeEmailView(generics.GenericAPIView):
-    serializer_class = EmailChangeSerializer
+    serializer_class = EmailSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -462,5 +464,82 @@ class ChangeEmailView(generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class ForgetPasswordView(generics.GenericAPIView):
-#     serializer_class =
+class ForgetPasswordView(generics.GenericAPIView):
+    serializer_class = EmailSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            email = serializer.validated_data["email"]
+            user = User.objects.get(email=email)
+
+            instance = VerificationRequests.objects.create(user=user, email=email)
+            
+            response, instance = regenerate_otp(instance)
+
+            if response is not None:
+                return response
+
+            return send_otp2email_util(instance, "verification_new_email.html")
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class CheckOTPtoChangePassword(generics.GenericAPIView):
+        serializer_class = OTPSerializer
+
+        def post(self, request, *args, **kwargs):
+            user_id = self.kwargs.get("user_id")
+            try:
+                instance = VerificationRequests.objects.filter(user__id=user_id).last()
+            except:
+                return Response("no object matches this id", status=status.HTTP_404_NOT_FOUND)
+
+            # if user.is_verified == True:
+            #     return Response("Your account is already verified.", status=status.HTTP_400_BAD_REQUEST)
+            if instance.otp != request.data.get("otp"):
+                return Response(
+                    "Please enter the correct OTP", status=status.HTTP_400_BAD_REQUEST
+                )
+            if instance.otp_expiry and datetime.datetime.now(datetime.UTC) < instance.otp_expiry:
+                request.user.is_verified = True
+                instance.otp_expiry = None
+                instance.otp_max_try = 3
+                instance.otp_max_out = None
+                instance.otp_done = True
+                instance.save()
+                
+                return Response(
+                    "OTP is correct", status=status.HTTP_200_OK)
+            else:
+                return Response("OTP is expired", status=status.HTTP_400_BAD_REQUEST)
+            
+class ConfirmForgetPassword(generics.GenericAPIView):
+    serializer_class = PasswordForgetSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            user_id = self.kwargs.get("user_id")
+            user = User.objects.get(id=user_id)
+
+            verify_request = VerificationRequests.objects.filter(user__id=user_id).last()
+
+
+            if verify_request.otp_done:
+                password = serializer.validated_data["new_password"]
+                user.set_password(password)
+                user.save()
+
+                return Response({"message": "Password reset succuessfuly"}, status=status.HTTP_200_OK)
+        
+            return Response({"message": "Enter correct OTP"}, status=status.HTTP_400_BAD_REQUEST)
+            
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+        

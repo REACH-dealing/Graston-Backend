@@ -96,9 +96,9 @@ load_dotenv()
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "Graston",
+#         "NAME": "reach",
 #         "USER": "postgres",
-#         "PASSWORD": "backend",
+#         "PASSWORD": "sql12345",
 #         "HOST": "localhost",
 #         "PORT": "5432",
 #     }
@@ -106,10 +106,19 @@ load_dotenv()
 
 DATABASES = {
     "default": dj_database_url.config(
-        default = "postgres://default:qo4O9nAasNdx@ep-shy-dream-a4f5mhi5-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require",
+        default = "postgresql://testing_db_owner:vCucrgPj4Y8H@ep-shrill-shadow-a2m3e259.eu-central-1.aws.neon.tech/reach_testing?sslmode=require",
         conn_max_age = 600
     )
 }
+
+# DATABASES = {
+#     "default": dj_database_url.config(
+#         default = "postgresql://testing_db_owner:vCucrgPj4Y8H@ep-shrill-shadow-a2m3e259.eu-central-1.aws.neon.tech/reach_testing?sslmode=require",
+#         conn_max_age = 600,
+#     )
+# }
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

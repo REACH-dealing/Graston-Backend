@@ -3,7 +3,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.validators import validate_email
 
-
 class Gender(models.TextChoices):
     """
     Gender choices for user
@@ -33,7 +32,7 @@ class User(AbstractUser):
     national_id = models.CharField(max_length=55, unique=True)
     identity = models.CharField(max_length=8, choices=Identity)
     email = models.EmailField(
-        max_length=63, blank=True, null=True, validators=[validate_email]
+        max_length=63, blank=True, null=True, validators=[validate_email], unique=True,
     )
     password = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=20, blank=True, null=True)

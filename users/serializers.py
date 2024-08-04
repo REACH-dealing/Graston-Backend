@@ -12,7 +12,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     """
     Serializer for User Registeration.
     """
-
+    password = serializers.CharField(max_length=128)
     class Meta:
         model = User
         fields = [
@@ -46,6 +46,10 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "country": {"required": True},
             "date_of_birth": {"required": True},
         }
+
+    def validate_password(self, value):
+        password_validation.validate_password(value)
+        return value
 
     @transaction.atomic
     def create(self, validated_data):

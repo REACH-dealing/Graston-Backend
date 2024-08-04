@@ -368,7 +368,7 @@ class SoftDeleteAccountView(generics.DestroyAPIView):
 
 class RectivateAccountView(generics.GenericAPIView):
     queryset = User.objects.filter(is_active=False)
-    
+    # serializer_class = 
     def post(self, request, *args, **kwargs):
         user = self.get_object()
         user.is_active = True
@@ -430,7 +430,13 @@ class ChangeEmailView(generics.GenericAPIView):
 
         if serializer.is_valid():
             user = request.user
+
             new_email = serializer.validated_data["new_email"]
+
+            check_if_unique = User.objects.filter(email = new_email)
+
+            if check_if_unique:
+                return Response({"message": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
             instance = VerificationRequests.objects.create(user=user, email=new_email)
             

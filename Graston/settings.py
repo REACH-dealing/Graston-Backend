@@ -148,8 +148,6 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = "/static/"
 MEDIA_URL = ""
-STATICFILES_DIRS = [BASE_DIR/ "static", "/var/www/static/"]
-
 
 # AUTH_USER_MODEL = "users.User"
 

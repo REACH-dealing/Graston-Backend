@@ -250,6 +250,6 @@ class VerifcationRequestsSerializer(serializers.ModelSerializer):
 
 
         
-class EmailChangeSerializer(serializers.Serializer):
-    new_email = serializers.EmailField(max_length=63, validators=[validate_email])
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=63, validators=[validate_email])
     

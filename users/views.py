@@ -12,7 +12,7 @@ from .serializers import (
     PasswordVerificationSerializer,
     PatientSerializer,
     NurseSerializer,
-    EmailChangeSerializer
+    EmailSerializer
 
 )
 from .models import User, VerificationRequests, Patient, Nurse
@@ -450,5 +450,5 @@ class ChangeEmailView(generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class VerifyNewEmailView(generics.GenericAPIView):
-#     serializer_class = OTPSerializer
+# class ForgetPasswordView(generics.GenericAPIView):
+#     serializer_class =

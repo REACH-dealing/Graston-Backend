@@ -31,7 +31,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "country",
             "date_of_birth",
             "nationality",
-            "profile_image",
         ]
         extra_kwargs = {
             "identity": {"read_only": True},

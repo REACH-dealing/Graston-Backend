@@ -75,7 +75,7 @@ class NurseRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Nurse
-        fields = ['user', 'specialization', 'certificates', 'medical_accreditations', 'available_working_hours']
+        fields = ['user', 'specialization', 'certificates', 'medical_accreditations']
 
     @transaction.atomic
     def create(self, validated_data):
@@ -238,7 +238,7 @@ class NurseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Nurse
-        fields = ('user', 'specialization', 'certificates', 'medical_accreditations', 'available_working_hours')
+        fields = ('user', 'specialization', 'certificates', 'medical_accreditations')
 
     
 class PasswordChangeSerializer(serializers.Serializer):
@@ -275,4 +275,14 @@ class PasswordForgetSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         password_validation.validate_password(value)
         return value
+    
+class UpdatePatientProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = ["profile_image", "city", "country", "chronic_diseases", "medical_report"]
+
+class UpdateNurseProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Nurse
+        fields = ["profile_image", "city", "country", "specialization", "certificates", "medical_accreditations"]
     

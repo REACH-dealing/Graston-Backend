@@ -75,7 +75,6 @@ class Nurse(models.Model):
     medical_accreditations = models.FileField(
         upload_to="accreditations/", blank=True, null=True
     )
-    available_working_hours = models.CharField(max_length=255, blank=True, null=True)
 
 
 class Admin(models.Model):
@@ -121,3 +120,28 @@ class VerificationRequests(models.Model):
     otp_done = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class DayChoices(models.TextChoices):
+    """
+    Day choices for user
+    """
+    SATURDAY = "SATURDAY"
+    SUNDAY = "SUNDAY"
+    MONDAY = "MONDAY"
+    TUESDAY = "TUESDAY"
+    WEDNESDAY = "WEDNESDAY"
+    THURSDAY = "THURSDAY"
+    FRIDAY = "FRIDAY"
+
+class WorkAvailableHours(models.Model):
+    nurse = models.ForeignKey(Nurse, on_delete=models.CASCADE)
+    day = models.CharField(max_length=15, choices=DayChoices)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    
+    class Meta:
+        unique_together = ('nurse', 'day')
+
+    def __str__(self):
+        return f"{self.nurse.email} - {self.date} {self.start_time}-{self.end_time}"

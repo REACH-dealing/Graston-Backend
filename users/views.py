@@ -16,6 +16,8 @@ from .serializers import (
     NurseSerializer,
     EmailSerializer,
     PasswordForgetSerializer,
+    UpdatePatientProfileSerializer,
+    UpdateNurseProfileSerializer,
 
 )
 from .models import User, VerificationRequests, Patient, Nurse
@@ -543,3 +545,10 @@ class ConfirmForgetPassword(generics.GenericAPIView):
 
 
         
+# Update patient profile >> image, city, country, chronic diseases, medical report 
+# update nurse profile >> image, city, country, spicializtion, certificates, medical accred
+
+class UpdatePatientProfileView(generics.UpdateAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = UpdateNurseProfileSerializer
+

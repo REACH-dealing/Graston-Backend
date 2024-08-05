@@ -42,7 +42,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "last_name": {"required": True},
             "email": {"required": True},
             "gender": {"required": True},
-            "location": {"required": True},
             "city": {"required": True},
             "country": {"required": True},
             "date_of_birth": {"required": True},

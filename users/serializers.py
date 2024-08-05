@@ -65,6 +65,7 @@ class PatientRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(**user_data)
         user.set_password(user_data['password'])
         user.identity = "P"
+        user.username = user_data['first_name'] + '_' + user_data['last_name'] + '_' + user_data['id']
         user.save()
         patient = Patient.objects.create(user=user, **validated_data)
         return patient
@@ -82,6 +83,7 @@ class NurseRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(**user_data)
         user.set_password(user_data['password'])
         user.identity = "D"
+        user.username = user_data['first_name'] + '_' + user_data['last_name'] + '_' + user_data['id']
         user.save()
         nurse = Nurse.objects.create(user=user, **validated_data)
         return nurse

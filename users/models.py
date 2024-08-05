@@ -36,12 +36,12 @@ class User(AbstractUser):
     )
     password = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-    gender = models.CharField(max_length=8, choices=Gender, blank=True)
-    nationality = models.CharField(max_length=27, blank=True)
-    location = models.CharField(max_length=55, blank=True)
-    city = models.CharField(max_length=27, blank=True)
-    country = models.CharField(max_length=27, blank=True)
-    date_of_birth = models.DateField(blank=True)
+    gender = models.CharField(max_length=8, choices=Gender, blank=True, null=True)
+    nationality = models.CharField(max_length=27, blank=True, null=True)
+    location = models.CharField(max_length=55, blank=True, null=True)
+    city = models.CharField(max_length=27, blank=True, null=True)
+    country = models.CharField(max_length=27, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
     profile_image = models.ImageField(
         upload_to="media/profile_images/", blank=True, null=True
     )

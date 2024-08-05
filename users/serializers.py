@@ -275,14 +275,25 @@ class PasswordForgetSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         password_validation.validate_password(value)
         return value
-    
-class UpdatePatientProfileSerializer(serializers.ModelSerializer):
+
+
+
+## update city, country, profile_image 
+## update patient and nurse data 
+
+class UpdateUserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["profile_image", "city", "country"]
+
+
+class UpdatePatientProfileSerialzier(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = ["profile_image", "city", "country", "chronic_diseases", "medical_report"]
+        fields = ["chronic_diseases", "medical_report"]
 
 class UpdateNurseProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nurse
-        fields = ["profile_image", "city", "country", "specialization", "certificates", "medical_accreditations"]
+        fields = ["specialization", "certificates", "medical_accreditations"]
     

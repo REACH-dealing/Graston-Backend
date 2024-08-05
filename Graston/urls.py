@@ -61,20 +61,25 @@ urlpatterns = [
     # ),
     # path("users/search/<str:string>/", UserSearch.as_view({"get": "list"})),
 
-    path("auth/delete_account/<pk>", SoftDeleteAccountView.as_view(), name="delete_account"),
-    path("auth/reactivate_account/<pk>", RectivateAccountView.as_view(), name="reactivate_account"),
+    path("auth/delete_account/<pk>/", SoftDeleteAccountView.as_view(), name="delete_account"),
+    path("auth/reactivate_account/<pk>/", RectivateAccountView.as_view(), name="reactivate_account"),
 
-    path("patient/<pk>", PatientDetailsView.as_view(), name="patient_details"),
-    path("nurse/<pk>", NurseDetailsView.as_view(), name="nurse_details"),
+    path("patient/<pk>/", PatientDetailsView.as_view(), name="patient_details"),
+    path("nurse/<pk>/", NurseDetailsView.as_view(), name="nurse_details"),
 
-    path("auth/change_password", PasswordChangeView.as_view(), name="change_password"),
-    path("auth/check_password", CheckPasswordView.as_view(), name="check_password"),
+    path("user/update-profile/<pk>/", UpdateUserProfileView.as_view(), name="update_user_profile"),
+    path("patient/update-profile/<pk>/", UpdatePatientProfileView.as_view(), name="update_patient_profile"),
+    path("nurse/update-profile/<pk>/", UpdateNurseProfileView.as_view(), name="update_nurse_profile"),
 
-    path("auth/change_email", ChangeEmailView.as_view(), name="change_email"),
 
-    path("auth/forget-password", ForgetPasswordView.as_view(), name="forget_password"),
-    path("auth/forget-password-verify-otp/<int:user_id>", CheckOTPtoChangePassword.as_view(), name="verify_password_verify_otp"),
-    path("auth/confirm-forget-password/<int:user_id>", ConfirmForgetPassword.as_view(), name="confirm_forget_password"),
+    path("auth/change_password/", PasswordChangeView.as_view(), name="change_password"),
+    path("auth/check_password/", CheckPasswordView.as_view(), name="check_password"),
+
+    path("auth/change_email/", ChangeEmailView.as_view(), name="change_email"),
+
+    path("auth/forget-password/", ForgetPasswordView.as_view(), name="forget_password"),
+    path("auth/forget-password-verify-otp/<int:user_id>/", CheckOTPtoChangePassword.as_view(), name="verify_password_verify_otp"),
+    path("auth/confirm-forget-password/<int:user_id>/", ConfirmForgetPassword.as_view(), name="confirm_forget_password"),
 ]
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

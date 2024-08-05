@@ -16,7 +16,8 @@ from .serializers import (
     NurseSerializer,
     EmailSerializer,
     PasswordForgetSerializer,
-    UpdatePatientProfileSerializer,
+    UpdateUserProfileSerializer,
+    UpdatePatientProfileSerialzier,
     UpdateNurseProfileSerializer,
 
 )
@@ -548,7 +549,27 @@ class ConfirmForgetPassword(generics.GenericAPIView):
 # Update patient profile >> image, city, country, chronic diseases, medical report 
 # update nurse profile >> image, city, country, spicializtion, certificates, medical accred
 
+class UpdateUserProfileView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UpdateUserProfileSerializer
+    http_method_names = ["patch"]
+
+
 class UpdatePatientProfileView(generics.UpdateAPIView):
     queryset = Patient.objects.all()
-    serializer_class = UpdateNurseProfileSerializer
+    serializer_class = UpdatePatientProfileSerialzier
+    http_method_names = ["patch"]
 
+    def get_object(self):
+        user_id = self.kwargs.get('pk')
+        return Patient.objects.get(user__id=user_id)
+
+class UpdateNurseProfileView(generics.UpdateAPIView):
+    queryset = Nurse.objects.all()
+    serializer_class = UpdateNurseProfileSerializer
+    http_method_names = ["patch"]
+
+
+    def get_object(self):
+        user_id = self.kwargs.get('pk')
+        return Nurse.objects.get(user__id=user_id)

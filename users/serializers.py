@@ -1,24 +1,20 @@
+import random
 from rest_framework import serializers
 from django.db import transaction
-from .models import User, Patient, Nurse, Admin, VerificationRequests
-
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import password_validation
-
 from django.core.validators import validate_email
-
+from .models import User, Patient, Nurse, Admin, VerificationRequests
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     """
     Serializer for User Registeration.
     """
-    password = serializers.CharField(max_length=128)
     class Meta:
         model = User
         fields = [
             "id",
             "national_id",
-            "username",
             "first_name",
             "last_name",
             "email",
@@ -36,7 +32,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "identity": {"read_only": True},
             "password": {"required": True, "write_only": True},
             "national_id": {"required": True},
-            "username": {"required": True},
             "first_name": {"required": True},
             "last_name": {"required": True},
             "email": {"required": True},
@@ -64,7 +59,7 @@ class PatientRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(**user_data)
         user.set_password(user_data['password'])
         user.identity = "P"
-        user.username = user_data['first_name'] + '_' + user_data['last_name'] + '_' + user_data['id']
+        user.username = user_data['first_name'] + '_' + user_data['last_name'] + '_' + str(random.randint(1000, 9999))
         user.save()
         patient = Patient.objects.create(user=user, **validated_data)
         return patient
@@ -82,7 +77,7 @@ class NurseRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(**user_data)
         user.set_password(user_data['password'])
         user.identity = "D"
-        user.username = user_data['first_name'] + '_' + user_data['last_name'] + '_' + user_data['id']
+        user.username = user_data['first_name'] + '_' + user_data['last_name'] + '_' + str(random.randint(1000, 9999))
         user.save()
         nurse = Nurse.objects.create(user=user, **validated_data)
         return nurse

@@ -28,21 +28,6 @@ from Graston.settings import SECRET_KEY
 from .utils import get_tokens, regenerate_otp, send_otp2email_util
 
 
-class RegisterView(viewsets.ModelViewSet):
-    """
-    Create a new user.
-    """
-
-    queryset = User.objects.none()
-    serializer_class = UserRegisterSerializer
-
-    def create(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({"Register Success": "Activate your accout"})
-
-
 class PatientRegisterView(generics.CreateAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientRegisterSerializer

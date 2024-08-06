@@ -68,7 +68,13 @@ urlpatterns = [
     path("nurse/<pk>/", NurseDetailsView.as_view(), name="nurse_details"),
 
     path("user/update-profile/<pk>/", UpdateUserProfileView.as_view(), name="update_user_profile"),
+
     path("patient/update-profile/<pk>/", UpdatePatientProfileView.as_view(), name="update_patient_profile"),
+
+    path("nurse/set-work-hours", CreateWorkHours.as_view(), name="set_work_hours"),
+    path("nurse/list-work-hours", RetrieveWorkHours.as_view(), name="list_work_hours"),
+    path("nurse/update-work-hours/<pk>", UpdateWorkHours.as_view(), name="update_work_hours"),
+    path("nurse/delete-work-hours/<pk>", DeleteWorkHours.as_view(), name="delete_work_hours"),
     path("nurse/update-profile/<pk>/", UpdateNurseProfileView.as_view(), name="update_nurse_profile"),
 
 
@@ -80,6 +86,8 @@ urlpatterns = [
     path("auth/forget-password/", ForgetPasswordView.as_view(), name="forget_password"),
     path("auth/forget-password-verify-otp/<int:user_id>/", CheckOTPtoChangePassword.as_view(), name="verify_password_verify_otp"),
     path("auth/confirm-forget-password/<int:user_id>/", ConfirmForgetPassword.as_view(), name="confirm_forget_password"),
+
+
 ]
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

@@ -19,10 +19,13 @@ from .serializers import (
     UpdateUserProfileSerializer,
     UpdatePatientProfileSerialzier,
     UpdateNurseProfileSerializer,
+    WorkHoursSerializer,
+    WorkHoursSerializer,
 
 )
-from .models import User, VerificationRequests, Patient, Nurse
+from .models import User, VerificationRequests, Patient, Nurse, WorkAvailableHours
 from rest_framework import status, generics
+from rest_framework.views import APIView
 from rest_framework import viewsets, pagination
 import jwt, datetime
 from Graston.settings import SECRET_KEY
@@ -530,9 +533,6 @@ class ConfirmForgetPassword(generics.GenericAPIView):
 
 
 
-        
-# Update patient profile >> image, city, country, chronic diseases, medical report 
-# update nurse profile >> image, city, country, spicializtion, certificates, medical accred
 
 class UpdateUserProfileView(generics.UpdateAPIView):
     queryset = User.objects.all()
@@ -558,3 +558,48 @@ class UpdateNurseProfileView(generics.UpdateAPIView):
     def get_object(self):
         user_id = self.kwargs.get('pk')
         return Nurse.objects.get(user__id=user_id)
+
+class CreateWorkHours(generics.CreateAPIView):
+    queryset = WorkAvailableHours.objects.all()
+    serializer_class = WorkHoursSerializer
+    lookup_field = None
+    http_method_names = ["post"]    
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                serializer.save(nurse=request.user.nurse)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            except:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RetrieveWorkHours(generics.ListAPIView):
+    queryset = WorkAvailableHours.objects.all()
+    serializer_class = WorkHoursSerializer
+
+    def get_object(self):
+        nurse = self.request.user.nurse
+        return WorkAvailableHours.objects.filter(nurse=nurse)
+
+
+class UpdateWorkHours(generics.UpdateAPIView):
+    queryset = WorkAvailableHours.objects.all()
+    serializer_class = WorkHoursSerializer
+    http_method_names = ["put"]
+
+    # def get_object(self):
+    #     nurse = self.request.user.nurse
+    #     day = self.request.data["day"]
+    #     return WorkAvailableHours.objects.get(nurse=nurse, day=day)
+    
+
+class DeleteWorkHours(generics.DestroyAPIView):
+    queryset = WorkAvailableHours.objects.all()
+    serializer_class = WorkHoursSerializer
+
+
+
+        

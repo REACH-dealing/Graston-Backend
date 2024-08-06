@@ -143,5 +143,16 @@ class WorkAvailableHours(models.Model):
     class Meta:
         unique_together = ('nurse', 'day')
 
+    # def clean(self):
+    #     super().clean()
+    #     if self.start_time and self.end_time and self.start_time >= self.end_time:
+    #         raise ValidationError("Start time must be less than end time.")
+
+    # def save(self, *args, **kwargs):
+    #     self.full_clean()
+    #     super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.nurse.email} - {self.date} {self.start_time}-{self.end_time}"
+    
+

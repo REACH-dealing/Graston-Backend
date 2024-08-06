@@ -4,7 +4,7 @@ from django.db import transaction
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import password_validation
 from django.core.validators import validate_email
-from .models import User, Patient, Nurse, Admin, VerificationRequests
+from .models import User, Patient, Nurse, Admin, VerificationRequests, WorkAvailableHours
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     """
@@ -291,4 +291,27 @@ class UpdateNurseProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nurse
         fields = ["specialization", "certificates", "medical_accreditations"]
+
+
+class WorkHoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkAvailableHours
+        fields =["id","day", "start_time", "end_time"]
+
+        extra_kwargs = {
+            "id": {"read_only": True}
+        }
+
+    
+    def validate(self, data):
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+
+        if start_time and end_time and start_time >= end_time:
+            raise serializers.ValidationError("Start time must be before end time.")
+
+        return data
+
+
+
     

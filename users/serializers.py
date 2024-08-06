@@ -4,12 +4,21 @@ from django.db import transaction
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import password_validation
 from django.core.validators import validate_email
-from .models import User, Patient, Nurse, Admin, VerificationRequests, WorkAvailableHours
+from .models import (
+    User,
+    Patient,
+    Nurse,
+    Admin,
+    VerificationRequests,
+    WorkAvailableHours,
+)
+
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     """
     Serializer for User Registeration.
     """
+
     class Meta:
         model = User
         fields = [
@@ -51,33 +60,55 @@ class PatientRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ['user', 'chronic_diseases', 'medical_report']
+        fields = [
+            "user",
+            "chronic_diseases",
+            "medical_report",
+        ]
 
     @transaction.atomic
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
+        user_data = validated_data.pop("user")
         user = User.objects.create(**user_data)
-        user.set_password(user_data['password'])
+        user.set_password(user_data["password"])
         user.identity = "P"
-        user.username = user_data['first_name'] + '_' + user_data['last_name'] + '_' + str(random.randint(1000, 9999))
+        user.username = (
+            user_data["first_name"]
+            + "_"
+            + user_data["last_name"]
+            + "_"
+            + str(random.randint(1000, 9999))
+        )
         user.save()
         patient = Patient.objects.create(user=user, **validated_data)
         return patient
+
 
 class NurseRegisterSerializer(serializers.ModelSerializer):
     user = UserRegisterSerializer()
 
     class Meta:
         model = Nurse
-        fields = ['user', 'specialization', 'certificates', 'medical_accreditations']
+        fields = [
+            "user",
+            "specialization",
+            "certificates",
+            "medical_accreditations",
+        ]
 
     @transaction.atomic
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
+        user_data = validated_data.pop("user")
         user = User.objects.create(**user_data)
-        user.set_password(user_data['password'])
+        user.set_password(user_data["password"])
         user.identity = "D"
-        user.username = user_data['first_name'] + '_' + user_data['last_name'] + '_' + str(random.randint(1000, 9999))
+        user.username = (
+            user_data["first_name"]
+            + "_"
+            + user_data["last_name"]
+            + "_"
+            + str(random.randint(1000, 9999))
+        )
         user.save()
         nurse = Nurse.objects.create(user=user, **validated_data)
         return nurse
@@ -114,7 +145,10 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "password"]
+        fields = [
+            "email",
+            "password",
+        ]
         extra_kwargs = {
             "password": {"required": True, "write_only": True},
             "email": {"required": True},
@@ -135,97 +169,16 @@ class OTPSerializer(serializers.ModelSerializer):
         fields = ["otp"]
 
 
-# class PatientSerializer(serializers.ModelSerializer):
-#     """
-#     Serializer for patient model
-#     """
-
-#     class Meta:
-#         model = Patient
-#         fields = [
-#             "user",
-#             "profile_image",
-#             "chronic_diseases",
-#             "medical_report",
-#         ]
-
-
-# class NurseSerializer(serializers.ModelSerializer):
-#     """
-#     Serializer for Nurse model
-#     """
-
-#     class Meta:
-#         model = Nurse
-#         fields = [
-#             "user",
-#             "profile_image",
-#             "specialization",
-#             "certificates",
-#             "medical_accreditations",
-#             "available_working_hours"
-#         ]
-
-
-# class AdminSerializer(serializers.ModelSerializer):
-#     """
-#     Serializer for Admin model
-#     """
-
-#     class Meta:
-#         model = Admin
-#         fields = ["user"]
-
-
-# # class AbstractSessionSerializer(serializers.ModelSerializer):
-# #     """
-# #     Serializer for AbstractSession model.
-# #     """
-
-# #     class Meta:
-# #         model = AbstractSession
-# #         fields = [
-# #             "id",
-# #             "session_type",
-# #             "price",
-# #         ]
-
-
-# # class SessionSerializer(serializers.ModelSerializer):
-# #     """
-# #     Serializer for Session model.
-# #     """
-
-# #     class Meta:
-# #         model = Session
-# #         fields = [
-# #             "id",
-# #             "session_type",
-# #             "price",
-# #             "patient",
-# #             "nurse",
-# #             "paid_price",
-# #             "total_sessions",
-# #             "remaining_sessions",
-# #             "prev_session",
-# #             "next_session",
-# #             "place",
-# #             "start_time",
-# #             "end_time",
-# #         ]
-# #         extra_kwargs = {
-# #             "session_type": {"read_only": True},
-# #             "price": {"read_only": True},
-# #         }
-
-
-
 class PatientSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
         model = Patient
-        fields = ('user', 'chronic_diseases', 'medical_report')
+        fields = [
+            "user",
+            "chronic_diseases",
+            "medical_report",
+        ]
 
 
 class NurseSerializer(serializers.ModelSerializer):
@@ -233,15 +186,20 @@ class NurseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Nurse
-        fields = ('user', 'specialization', 'certificates', 'medical_accreditations')
+        fields = [
+            "user",
+            "specialization",
+            "certificates",
+            "medical_accreditations",
+        ]
 
-    
+
 class PasswordChangeSerializer(serializers.Serializer):
     current_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
 
     def validate_current_password(self, value):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if not check_password(value, user.password):
             raise serializers.ValidationError("Current password is incorrect.")
         return value
@@ -249,9 +207,11 @@ class PasswordChangeSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         password_validation.validate_password(value)
         return value
-    
+
+
 class PasswordVerificationSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
+
 
 class VerifcationRequestsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -259,7 +219,6 @@ class VerifcationRequestsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-        
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=63, validators=[validate_email])
 
@@ -272,46 +231,56 @@ class PasswordForgetSerializer(serializers.Serializer):
         return value
 
 
+## update city, country, profile_image
+## update patient and nurse data
 
-## update city, country, profile_image 
-## update patient and nurse data 
 
 class UpdateUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["profile_image", "city", "country"]
+        fields = [
+            "profile_image",
+            "city",
+            "country",
+        ]
 
 
 class UpdatePatientProfileSerialzier(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = ["chronic_diseases", "medical_report"]
+        fields = [
+            "chronic_diseases",
+            "medical_report",
+        ]
+
 
 class UpdateNurseProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nurse
-        fields = ["specialization", "certificates", "medical_accreditations"]
+        fields = [
+            "specialization",
+            "certificates",
+            "medical_accreditations",
+        ]
 
 
 class WorkHoursSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkAvailableHours
-        fields =["id","day", "start_time", "end_time"]
+        fields = [
+            "id",
+            "day",
+            "start_time",
+            "end_time",
+        ]
 
-        extra_kwargs = {
-            "id": {"read_only": True}
-        }
+        extra_kwargs = {"id": {"read_only": True}}
 
-    
     def validate(self, data):
-        start_time = data.get('start_time')
-        end_time = data.get('end_time')
+        start_time = data.get("start_time")
+        end_time = data.get("end_time")
 
         if start_time and end_time and start_time >= end_time:
             raise serializers.ValidationError("Start time must be before end time.")
 
         return data
-
-
-
-    

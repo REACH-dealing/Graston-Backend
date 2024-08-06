@@ -17,9 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-
 from django.conf.urls.static import static
-from Graston.settings import STATIC_ROOT, STATIC_URL
 
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -27,67 +25,163 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from Graston.settings import STATIC_ROOT, STATIC_URL
 from users.views import *
 
 urlpatterns = [
-    # admin end point
-    path("admin/", admin.site.urls),
-    # API auto documentation end points
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+
+#_________________________________ admin end point ____________________________________________#
+
+    path("admin", admin.site.urls),
+
+#__________________________ API auto documentation end points _________________________________#
+
     path(
-        "api/schema/swagger-ui/",
+        "api/schema",
+        SpectacularAPIView.as_view(),
+        name="schema",
+    ),
+    path(
+        "api/schema/swagger-ui",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
     path(
-        "api/schema/redoc/",
+        "api/schema/redoc",
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-    # # User authentication end points
-    path('auth/register/patient/', PatientRegisterView.as_view()),
-    path('auth/register/nurse/', NurseRegisterView.as_view()),
-    path("auth/login/", LoginView.as_view({"post": "login"})),
-    path("auth/logout/", LogoutView.as_view({"post": "logout"})),
-    # path("auth/refresh-token/", RefreshTokenView.as_view({"post": "refresh_token"})),
-    path("auth/send-otp2email/<int:user_id>/", VerifyAccount.as_view({"get": "send_otp2email"})),
-    path("auth/verify-otp/<int:user_id>/", VerifyAccount.as_view({"post": "verify_otp"})),
-    path("auth/user/", UserView.as_view({"get": "retrieve"})),
-    # # User end points
-    # path("users/", UserViewSet.as_view({"get": "list"})),
+
+#____________________________ User authentication end points ___________________________________#
+
+    path(
+        "auth/register/patient",
+        PatientRegisterView.as_view(),
+        name="patient_register",
+    ),
+    path(
+        "auth/register/nurse",
+        NurseRegisterView.as_view(),
+        name="nurse_register",
+    ),
+    path(
+        "auth/send-otp2email/<int:user_id>",
+        VerifyAccount.as_view({"get": "send_otp2email"}),
+        name="send_otp2email",
+    ),
+    path(
+        "auth/verify-otp/<int:user_id>",
+        VerifyAccount.as_view({"post": "verify_otp"}),
+        name="verify_otp",
+    ),
+    path(
+        "auth/login",
+        LoginView.as_view({"post": "login"}),
+        name="login",
+    ),
+    path(
+        "auth/logout",
+        LogoutView.as_view({"post": "logout"}),
+        name="logout",
+    ),
+    path(
+        "auth/user",
+        UserView.as_view({"get": "retrieve"}),
+        name="logged_in_user_data",
+    ),
     # path(
-    #     "users/<int:pk>/",
-    #     UserViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"}),
+    #     "auth/refresh-token",
+    #     RefreshTokenView.as_view({"post": "refresh_token"}),
+    #     name="refresh_token",
     # ),
-    # path("users/search/<str:string>/", UserSearch.as_view({"get": "list"})),
+    path(
+        "auth/delete-account/<pk>",
+        SoftDeleteAccountView.as_view(),
+        name="delete_account",
+    ),
+    path(
+        "auth/reactivate-account/<pk>",
+        RectivateAccountView.as_view(),
+        name="reactivate_account",
+    ),
+    path(
+        "auth/change-password",
+        PasswordChangeView.as_view(),
+        name="change_password",
+    ),
+    path(
+        "auth/check-password",
+        CheckPasswordView.as_view(),
+        name="check_password",
+    ),
+    path(
+        "auth/change-email",
+        ChangeEmailView.as_view(),
+        name="change_email",
+    ),
+    path(
+        "auth/forget-password",
+        ForgetPasswordView.as_view(),
+        name="forget_password",
+    ),
+    path(
+        "auth/forget-password/verify-otp/<int:user_id>",
+        CheckOTPtoChangePassword.as_view(),
+        name="verify_password_verify_otp",
+    ),
+    path(
+        "auth/forget-password/confirm/<int:user_id>",
+        ConfirmForgetPassword.as_view(),
+        name="confirm_forget_password",
+    ),
 
-    path("auth/delete_account/<pk>/", SoftDeleteAccountView.as_view(), name="delete_account"),
-    path("auth/reactivate_account/<pk>/", RectivateAccountView.as_view(), name="reactivate_account"),
+#________________________________ User end points _________________________________#
 
-    path("patient/<pk>/", PatientDetailsView.as_view(), name="patient_details"),
-    path("nurse/<pk>/", NurseDetailsView.as_view(), name="nurse_details"),
-
-    path("user/update-profile/<pk>/", UpdateUserProfileView.as_view(), name="update_user_profile"),
-
-    path("patient/update-profile/<pk>/", UpdatePatientProfileView.as_view(), name="update_patient_profile"),
-
-    path("nurse/set-work-hours", CreateWorkHours.as_view(), name="set_work_hours"),
-    path("nurse/list-work-hours", RetrieveWorkHours.as_view(), name="list_work_hours"),
-    path("nurse/update-work-hours/<pk>", UpdateWorkHours.as_view(), name="update_work_hours"),
-    path("nurse/delete-work-hours/<pk>", DeleteWorkHours.as_view(), name="delete_work_hours"),
-    path("nurse/update-profile/<pk>/", UpdateNurseProfileView.as_view(), name="update_nurse_profile"),
-
-
-    path("auth/change_password/", PasswordChangeView.as_view(), name="change_password"),
-    path("auth/check_password/", CheckPasswordView.as_view(), name="check_password"),
-
-    path("auth/change_email/", ChangeEmailView.as_view(), name="change_email"),
-
-    path("auth/forget-password/", ForgetPasswordView.as_view(), name="forget_password"),
-    path("auth/forget-password-verify-otp/<int:user_id>/", CheckOTPtoChangePassword.as_view(), name="verify_password_verify_otp"),
-    path("auth/confirm-forget-password/<int:user_id>/", ConfirmForgetPassword.as_view(), name="confirm_forget_password"),
-
-
+    path(
+        "patient/<pk>",
+        PatientDetailsView.as_view(),
+        name="patient_details",
+    ),
+    path(
+        "nurse/<pk>",
+        NurseDetailsView.as_view(),
+        name="nurse_details",
+    ),
+    path(
+        "user/profile/<pk>",
+        UpdateUserProfileView.as_view(),
+        name="update_user_profile",
+    ),
+    path(
+        "patient/profile/<pk>",
+        UpdatePatientProfileView.as_view(),
+        name="update_patient_profile",
+    ),
+    path(
+        "nurse/profile/<pk>",
+        UpdateNurseProfileView.as_view(),
+        name="update_nurse_profile",
+    ),
+    path(
+        "nurse/set-work-hours",
+        CreateWorkHours.as_view(),
+        name="set_work_hours",
+    ),
+    path(
+        "nurse/list-work-hours",
+        RetrieveWorkHours.as_view(),
+        name="list_work_hours",
+    ),
+    path(
+        "nurse/update-work-hours/<pk>",
+        UpdateWorkHours.as_view(),
+        name="update_work_hours",
+    ),
+    path(
+        "nurse/delete-work-hours/<pk>",
+        DeleteWorkHours.as_view(),
+        name="delete_work_hours",
+    ),
 ]
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

@@ -1,13 +1,13 @@
+import jwt
+import random
+import datetime
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-import datetime
-import random
-import jwt
-from Graston.settings import SECRET_KEY
 from .models import User, VerificationRequests
+from Graston.settings import SECRET_KEY
 
 
 def regenerate_otp(instance):
@@ -15,11 +15,17 @@ def regenerate_otp(instance):
     Utility function to regenerate OTP for the given user.
     """
 
-    if instance.otp_max_try == 0 and datetime.datetime.now(datetime.UTC) < instance.otp_max_out:
-        return [Response(
-            "Max OTP try reached, try after a three minutes",
-            status=status.HTTP_400_BAD_REQUEST,
-        ), instance]
+    if (
+        instance.otp_max_try == 0
+        and datetime.datetime.now(datetime.UTC) < instance.otp_max_out
+    ):
+        return [
+            Response(
+                "Max OTP try reached, try after a three minutes",
+                status=status.HTTP_400_BAD_REQUEST,
+            ),
+            instance,
+        ]
 
     instance.otp = random.randint(1000, 9999)
     instance.otp_expiry = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
@@ -62,23 +68,25 @@ def send_otp2email_util(instance, html_file_name):
             html_message=html_content,
             fail_silently=False,
         )
-        
 
-        return Response({
-            "user_id": instance.user.id,
-            "message": f"We sent otp number to your email: {instance.email}",     
-        }, status=status.HTTP_200_OK,)
-        
+        return Response(
+            {
+                "user_id": instance.user.id,
+                "message": f"We sent otp number to your email: {instance.email}",
+            },
+            status=status.HTTP_200_OK,
+        )
 
     except Exception as e:
         return Response(e, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
 def send_otp2phone_util(user_id):
-	"""
-	Utility function to send otp number to phone.
-	"""
-	pass
+    """
+    Utility function to send otp number to phone.
+    """
+    pass
+
 
 def get_tokens(user):
     """

@@ -60,7 +60,7 @@ ROOT_URLCONF = "Graston.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR/"templates"],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -80,6 +80,7 @@ WSGI_APPLICATION = "Graston.wsgi.application"
 
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # DATABASES = {
@@ -106,8 +107,8 @@ load_dotenv()
 
 DATABASES = {
     "default": dj_database_url.config(
-        default = os.environ.get("POSTGRES_URL"),
-        conn_max_age = 600
+        default=os.environ.get("POSTGRES_URL"),
+        conn_max_age=600,
     )
 }
 
@@ -157,11 +158,11 @@ CORS_ALLOWED_ALL_ORIGINS = True
 CORS_ALLOWED_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-idx-django-workspace-1721820460889.cluster-6yqpn75caneccvva7hjo4uejgk.cloudworkstations.dev', 
-    'https://graston-backend-production.up.railway.app',
-    'http://localhost:8000',
-    'http://localhost:3000',
-    'http://127.0.0.1:8000',
+    "https://8000-idx-django-workspace-1721820460889.cluster-6yqpn75caneccvva7hjo4uejgk.cloudworkstations.dev",
+    "https://graston-backend-production.up.railway.app",
+    "http://localhost:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
 ]
 
 REST_FRAMEWORK = {
@@ -176,10 +177,10 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") # 'google app passwords'
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")  # 'google app passwords'

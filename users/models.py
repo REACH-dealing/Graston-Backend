@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.validators import validate_email
 
+
 class Gender(models.TextChoices):
     """
     Gender choices for user
@@ -32,7 +33,11 @@ class User(AbstractUser):
     national_id = models.CharField(max_length=55, unique=True)
     identity = models.CharField(max_length=8, choices=Identity)
     email = models.EmailField(
-        max_length=63, blank=True, null=True, validators=[validate_email], unique=True,
+        max_length=63,
+        blank=True,
+        null=True,
+        validators=[validate_email],
+        unique=True,
     )
     password = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
@@ -48,10 +53,11 @@ class User(AbstractUser):
     bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
 
-
+    # override some attributes
     last_login = None
     groups = None
     user_permissions = None
+
     # django depend on username in authentication process but
     # we want to depend on email in authentication process
     # because email is unique field
@@ -105,20 +111,15 @@ class Admin(models.Model):
 
 class VerificationRequests(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
     email = models.EmailField(
         max_length=63, blank=True, null=True, validators=[validate_email]
     )
-
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-
     otp = models.SmallIntegerField(blank=True, null=True)
     otp_max_try = models.SmallIntegerField(default=3)
     otp_expiry = models.DateTimeField(blank=True, null=True)
     otp_max_out = models.DateTimeField(blank=True, null=True)
-
     otp_done = models.BooleanField(default=False)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -126,6 +127,7 @@ class DayChoices(models.TextChoices):
     """
     Day choices for user
     """
+
     SATURDAY = "SATURDAY"
     SUNDAY = "SUNDAY"
     MONDAY = "MONDAY"
@@ -134,14 +136,15 @@ class DayChoices(models.TextChoices):
     THURSDAY = "THURSDAY"
     FRIDAY = "FRIDAY"
 
+
 class WorkAvailableHours(models.Model):
     nurse = models.ForeignKey(Nurse, on_delete=models.CASCADE)
     day = models.CharField(max_length=15, choices=DayChoices)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    
+
     class Meta:
-        unique_together = ('nurse', 'day')
+        unique_together = ("nurse", "day")
 
     # def clean(self):
     #     super().clean()
@@ -154,5 +157,3 @@ class WorkAvailableHours(models.Model):
 
     def __str__(self):
         return f"{self.nurse.email} - {self.date} {self.start_time}-{self.end_time}"
-    
-

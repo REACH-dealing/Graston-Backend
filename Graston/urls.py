@@ -49,7 +49,7 @@ urlpatterns = [
     path('auth/register/nurse/', NurseRegisterView.as_view()),
     path("auth/login/", LoginView.as_view({"post": "login"})),
     path("auth/logout/", LogoutView.as_view({"post": "logout"})),
-    path("auth/refresh-token/", RefreshTokenView.as_view({"post": "refresh_token"})),
+    # path("auth/refresh-token/", RefreshTokenView.as_view({"post": "refresh_token"})),
     path("auth/send-otp2email/<int:user_id>/", VerifyAccount.as_view({"get": "send_otp2email"})),
     path("auth/verify-otp/<int:user_id>/", VerifyAccount.as_view({"post": "verify_otp"})),
     path("auth/user/", UserView.as_view({"get": "retrieve"})),

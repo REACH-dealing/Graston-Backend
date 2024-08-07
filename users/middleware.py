@@ -8,13 +8,13 @@ from Graston.settings import SECRET_KEY
 
 class AuthenticationMiddleware(MiddlewareMixin):
     EXEMPT_PATHS = [
-        "/admin/",
-        "/auth/register/patient/",
-        "/auth/register/nurse/",
-        "/auth/login/",
+        "/admin",
+        "/auth/register/patient",
+        "/auth/register/nurse",
+        "/auth/login",
         "/auth/refresh-token/",
-        "/auth/send-otp2email/",
-        "/auth/verify-email/",
+        "/auth/send-otp2email",
+        "/auth/verify-email",
         "/api/schema/",
         "/api/schema/swagger-ui/",
         "/api/schema/redoc/",

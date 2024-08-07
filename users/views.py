@@ -463,11 +463,20 @@ class UpdateNurseProfileView(generics.UpdateAPIView):
         return Nurse.objects.get(user__id=user_id)
 
 
-class CreateWorkHours(generics.CreateAPIView):
+
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+class WorkHoursViewSet(viewsets.ModelViewSet):
     queryset = WorkAvailableHours.objects.all()
     serializer_class = WorkHoursSerializer
-    lookup_field = None
-    http_method_names = ["post"]
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+    def get_queryset(self):
+        nurse = self.request.user.nurse
+        return WorkAvailableHours.objects.filter(nurse=nurse)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -475,32 +484,63 @@ class CreateWorkHours(generics.CreateAPIView):
             try:
                 serializer.save(nurse=request.user.nurse)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            except:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            try:
+                serializer.save()
+                return Response(serializer.data)
+            except Exception as e:
+                return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RetrieveWorkHours(generics.ListAPIView):
-    queryset = WorkAvailableHours.objects.all()
-    serializer_class = WorkHoursSerializer
 
-    def get_object(self):
-        nurse = self.request.user.nurse
+# class RetrieveWorkHours(generics.ListAPIView):
+#     queryset = WorkAvailableHours.objects.all()
+#     serializer_class = WorkHoursSerializer
+#     lookup_field = None
 
-        return WorkAvailableHours.objects.filter(nurse=nurse)
+#     def get_object(self):
+#         nurse = self.request.user.nurse
+
+#         return WorkAvailableHours.objects.filter(nurse=nurse)
 
 
-class UpdateWorkHours(generics.UpdateAPIView):
-    queryset = WorkAvailableHours.objects.all()
-    serializer_class = WorkHoursSerializer
-    http_method_names = ["put"]
+# class CreateWorkHours(generics.CreateAPIView):
+#     queryset = WorkAvailableHours.objects.all()
+#     serializer_class = WorkHoursSerializer
+#     lookup_field = None
+#     http_method_names = ["post"]
 
-    # def get_object(self):
-    #     nurse = self.request.user.nurse
-    #     day = self.request.data["day"]
-    #     return WorkAvailableHours.objects.get(nurse=nurse, day=day)
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         if serializer.is_valid():
+#             try:
+#                 serializer.save(nurse=request.user.nurse)
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+#             except:
+#                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class UpdateWorkHours(generics.UpdateAPIView):
+#     queryset = WorkAvailableHours.objects.all()
+#     serializer_class = WorkHoursSerializer
+#     http_method_names = ["put"]
+
+#     # def get_object(self):
+#     #     nurse = self.request.user.nurse
+#     #     day = self.request.data["day"]
+#     #     return WorkAvailableHours.objects.get(nurse=nurse, day=day)
 
 
 class DeleteWorkHours(generics.DestroyAPIView):

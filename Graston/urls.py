@@ -28,6 +28,7 @@ from drf_spectacular.views import (
 from Graston.settings import STATIC_ROOT, STATIC_URL
 from users.views import *
 
+
 urlpatterns = [
 
 #_________________________________ admin end point ____________________________________________#
@@ -138,12 +139,12 @@ urlpatterns = [
 #________________________________ User end points _________________________________#
 
     path(
-        "patient/<pk>",
+        "patient/<int:pk>",
         PatientDetailsView.as_view(),
         name="patient_details",
     ),
     path(
-        "nurse/<pk>",
+        "nurse/<int:pk>",
         NurseDetailsView.as_view(),
         name="nurse_details",
     ),
@@ -162,26 +163,50 @@ urlpatterns = [
         UpdateNurseProfileView.as_view(),
         name="update_nurse_profile",
     ),
-    path(
-        "nurse/set-work-hours",
-        CreateWorkHours.as_view(),
-        name="set_work_hours",
+    # path(
+    #     "nurse/work-hours",
+    #     CreateWorkHours.as_view(),
+    #     name="set_work_hours",
+    # ),
+    # path(
+    #     "nurse/work-hours",
+    #     RetrieveWorkHours.as_view(),
+    #     name="list_work_hours",
+    # ),
+    # path(
+    #     "nurse/work-hours/<int:pk>",
+    #     UpdateWorkHours.as_view(),
+    #     name="update_work_hours",
+    # ),
+    # path(
+    #     "nurse/work-hours/<int:pk>",
+    #     DeleteWorkHours.as_view(),
+    #     name="delete_work_hours",
+    # ),
+
+    path('work_hours/', 
+        WorkHoursViewSet.as_view({
+            'get': 'list',
+            'post': 'create'
+        }),
+        name='work_hours_list'
     ),
-    path(
-        "nurse/list-work-hours",
-        RetrieveWorkHours.as_view(),
-        name="list_work_hours",
-    ),
-    path(
-        "nurse/update-work-hours/<pk>",
-        UpdateWorkHours.as_view(),
-        name="update_work_hours",
-    ),
-    path(
-        "nurse/delete-work-hours/<pk>",
-        DeleteWorkHours.as_view(),
-        name="delete_work_hours",
+    path('work_hours/<int:pk>/',
+        WorkHoursViewSet.as_view({ 
+        # 'get': 'retrieve',
+        'put': 'update',
+        'delete': 'destroy'
+        }),
+        name='work_hours_detail'
     ),
 ]
+
+
+# urlpatterns = [
+#     path('work_hours/', work_hours_list, name='work_hours_list'),
+#     path('work_hours/<int:pk>/', work_hours_detail, name='work_hours_detail'),
+# ]
+
+
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

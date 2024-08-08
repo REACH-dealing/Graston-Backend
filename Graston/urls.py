@@ -30,13 +30,9 @@ from users.views import *
 
 
 urlpatterns = [
-
-#_________________________________ admin end point ____________________________________________#
-
+    # _________________________________ admin end point ____________________________________________#
     path("admin", admin.site.urls),
-
-#__________________________ API auto documentation end points _________________________________#
-
+    # __________________________ API auto documentation end points _________________________________#
     path(
         "api/schema/",
         SpectacularAPIView.as_view(),
@@ -52,9 +48,7 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-
-#____________________________ User authentication end points ___________________________________#
-
+    # ____________________________ User authentication end points ___________________________________#
     path(
         "auth/register/patient",
         PatientRegisterView.as_view(),
@@ -135,9 +129,7 @@ urlpatterns = [
         ConfirmForgetPassword.as_view(),
         name="confirm_forget_password",
     ),
-
-#________________________________ User end points _________________________________#
-
+    # ________________________________ User end points _________________________________#
     path(
         "patient/<int:pk>",
         PatientDetailsView.as_view(),
@@ -183,30 +175,28 @@ urlpatterns = [
     #     DeleteWorkHours.as_view(),
     #     name="delete_work_hours",
     # ),
-
-    path('work_hours/', 
-        WorkHoursViewSet.as_view({
-            'get': 'list',
-            'post': 'create'
-        }),
-        name='work_hours_list'
+    path(
+        "nurse/work_hours/",
+        WorkHoursViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
+        name="work_hours_list",
     ),
-    path('work_hours/<int:pk>/',
-        WorkHoursViewSet.as_view({ 
-        # 'get': 'retrieve',
-        'put': 'update',
-        'delete': 'destroy'
-        }),
-        name='work_hours_detail'
+    path(
+        "nurse/work_hours/<int:pk>/",
+        WorkHoursViewSet.as_view(
+            {
+                # 'get': 'retrieve',
+                "put": "update",
+                "delete": "destroy",
+            }
+        ),
+        name="work_hours_detail",
     ),
 ]
-
-
-# urlpatterns = [
-#     path('work_hours/', work_hours_list, name='work_hours_list'),
-#     path('work_hours/<int:pk>/', work_hours_detail, name='work_hours_detail'),
-# ]
-
 
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

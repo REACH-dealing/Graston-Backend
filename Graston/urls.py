@@ -155,26 +155,6 @@ urlpatterns = [
         UpdateNurseProfileView.as_view(),
         name="update_nurse_profile",
     ),
-    # path(
-    #     "nurse/work-hours",
-    #     CreateWorkHours.as_view(),
-    #     name="set_work_hours",
-    # ),
-    # path(
-    #     "nurse/work-hours",
-    #     RetrieveWorkHours.as_view(),
-    #     name="list_work_hours",
-    # ),
-    # path(
-    #     "nurse/work-hours/<int:pk>",
-    #     UpdateWorkHours.as_view(),
-    #     name="update_work_hours",
-    # ),
-    # path(
-    #     "nurse/work-hours/<int:pk>",
-    #     DeleteWorkHours.as_view(),
-    #     name="delete_work_hours",
-    # ),
     path(
         "nurse/work_hours/",
         WorkHoursViewSet.as_view(

@@ -60,7 +60,7 @@ ROOT_URLCONF = "Graston.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -80,35 +80,37 @@ WSGI_APPLICATION = "Graston.wsgi.application"
 
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ.get("POSTGRES_DATABASE"),
-        "USER": os.environ.get("POSTGRES_USER"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_HOST"),
-        "PORT": os.environ.get("5432"),
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#         "NAME": os.environ.get("POSTGRES_DATABASE"),
+#         "USER": os.environ.get("POSTGRES_USER"),
+#         "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+#         "HOST": os.environ.get("POSTGRES_HOST"),
+#         "PORT": os.environ.get("5432"),
+#     }
+# }
 
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "Graston",
+#         "NAME": "reach",
 #         "USER": "postgres",
-#         "PASSWORD": "backend",
+#         "PASSWORD": "sql12345",
 #         "HOST": "localhost",
 #         "PORT": "5432",
 #     }
 # }
 
-# DATABASES = {
-#     "default": dj_database_url.parse(
-#         "postgresql://books_platform_m1b6_user:g5mAd9mQKlKu9bjkiOLG02unpFvSk2FB@dpg-cpr1b5rv2p9s739vmig0-a.oregon-postgres.render.com/books_platform_m1b6"
-#     )
-# }
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.environ.get("POSTGRES_URL"),
+        conn_max_age=600,
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -144,13 +146,24 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = "/static/"
-MEDIA_URL = "media/"
+MEDIA_URL = ""
 
 # AUTH_USER_MODEL = "users.User"
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ALL_ORIGINS = True
+CORS_ALLOWED_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://8000-idx-django-workspace-1721820460889.cluster-6yqpn75caneccvva7hjo4uejgk.cloudworkstations.dev",
+    "https://graston-backend-production.up.railway.app",
+    "http://localhost:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",  # for api auto documentation
@@ -158,15 +171,16 @@ REST_FRAMEWORK = {
 
 # Spectacular settings for api auto documentation
 SPECTACULAR_SETTINGS = {
-    "TITLE": "THAMARAT API",
+    "TITLE": "Graston API",
     "DESCRIPTION": "This is swagger interactive API documentation",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'sender@gmail.com'
-EMAIL_HOST_PASSWORD = 'google app passwords'
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")  # 'google app passwords'

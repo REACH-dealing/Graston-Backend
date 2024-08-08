@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     "drf_spectacular",  # for api auto documentation
     "corsheaders",
     "users",
+    "graston_sessions",
+    "django.contrib.gis",
+
 ]
 
 MIDDLEWARE = [
@@ -184,3 +187,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")  # 'google app passwords'
+
+
+
+GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal308.dll"
+GEOS_LIBRARY_PATH = r"C:\OSGeo4W\bin\geos_c.dll"

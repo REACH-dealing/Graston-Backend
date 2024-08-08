@@ -480,7 +480,6 @@ class UpdateNurseProfileView(generics.UpdateAPIView):
 class WorkHoursViewSet(viewsets.ModelViewSet):
     queryset = WorkAvailableHours.objects.all()
     serializer_class = WorkHoursSerializer
-    # permission_classes = [IsAuthenticated]
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
@@ -494,11 +493,11 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
                 serializer.save(nurse=request.user.nurse)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception as e:
-                return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         if serializer.is_valid():
@@ -506,7 +505,7 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
                 serializer.save()
                 return Response(serializer.data)
             except Exception as e:
-                return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

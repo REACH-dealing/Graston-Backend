@@ -95,7 +95,7 @@ urlpatterns = [
         name="delete_account",
     ),
     path(
-        "auth/reactivate-account/<pk>",
+        "auth/reactivate-account",
         RectivateAccountView.as_view(),
         name="reactivate_account",
     ),

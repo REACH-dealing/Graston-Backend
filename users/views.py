@@ -257,8 +257,15 @@ class SoftDeleteAccountView(generics.DestroyAPIView):
 
 class RectivateAccountView(generics.GenericAPIView):
     queryset = User.objects.filter(is_active=False)
+    serializer_class = EmailSerializer
 
-    # serializer_class =
+    def get_object(self):
+        try:
+            user = User.objects.get(email=self.request.data["email"])
+            return user
+        except User.DoesNotExist:
+            raise Http404("User does not exist")
+        
     def post(self, request, *args, **kwargs):
         user = self.get_object()
         user.is_active = True

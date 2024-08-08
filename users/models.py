@@ -53,6 +53,8 @@ class User(AbstractUser):
     bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
 
+    profile_completed = models.BooleanField(default=False)
+
     # override some attributes
     last_login = None
     groups = None
@@ -81,6 +83,8 @@ class Nurse(models.Model):
     medical_accreditations = models.FileField(
         upload_to="accreditations/", blank=True, null=True
     )
+
+    admin_verification = models.BooleanField(default=False)
 
 
 class Admin(models.Model):

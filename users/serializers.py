@@ -254,6 +254,8 @@ class UpdatePatientProfileSerialzier(serializers.ModelSerializer):
         ]
 
 
+
+
 class UpdateNurseProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nurse
@@ -262,6 +264,12 @@ class UpdateNurseProfileSerializer(serializers.ModelSerializer):
             "certificates",
             "medical_accreditations",
         ]
+
+        extra_kwargs = {
+            "specialization": {"required": True},
+            "certificates": {"required": True},
+            "medical_accreditations": {"required": True},
+        }
 
 
 class WorkHoursSerializer(serializers.ModelSerializer):

@@ -48,7 +48,7 @@ class AuthenticationMiddleware(MiddlewareMixin):
 
         except jwt.exceptions.DecodeError as identifier:
             return JsonResponse(
-                {"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         if payload["refresh"] == True:

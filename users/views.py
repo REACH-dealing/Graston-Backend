@@ -455,23 +455,32 @@ class UpdatePatientProfileView(generics.UpdateAPIView):
 class UpdateNurseProfileView(generics.UpdateAPIView):
     queryset = Nurse.objects.all()
     serializer_class = UpdateNurseProfileSerializer
-    http_method_names = ["patch"]
+    http_method_names = ["put"]
 
     def get_object(self):
-        user_id = self.kwargs.get("pk")
+        return self.request.user.nurse
 
-        return Nurse.objects.get(user__id=user_id)
+    def update(self, request, *args, **kwargs):
+        user = request.user
+
+        if user.profile_completed:
+            return Response({"detail": "Profile is already completed"}, status=status.HTTP_400_BAD_REQUEST)
+    
+        response = super().update(request, *args, **kwargs)
+
+        user.profile_updated = True
+        user.save()
+
+        return response
+
+    
 
 
-
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 
 class WorkHoursViewSet(viewsets.ModelViewSet):
     queryset = WorkAvailableHours.objects.all()
     serializer_class = WorkHoursSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
@@ -543,6 +552,6 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
 #     #     return WorkAvailableHours.objects.get(nurse=nurse, day=day)
 
 
-class DeleteWorkHours(generics.DestroyAPIView):
-    queryset = WorkAvailableHours.objects.all()
-    serializer_class = WorkHoursSerializer
+# class DeleteWorkHours(generics.DestroyAPIView):
+#     queryset = WorkAvailableHours.objects.all()
+#     serializer_class = WorkHoursSerializer

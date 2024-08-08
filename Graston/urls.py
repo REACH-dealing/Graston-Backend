@@ -90,7 +90,7 @@ urlpatterns = [
     #     name="refresh_token",
     # ),
     path(
-        "auth/delete-account/<pk>",
+        "auth/delete-account",
         SoftDeleteAccountView.as_view(),
         name="delete_account",
     ),
@@ -131,32 +131,32 @@ urlpatterns = [
     ),
     # ________________________________ User end points _________________________________#
     path(
-        "patient/<int:pk>",
+        "patient",
         PatientDetailsView.as_view(),
         name="patient_details",
     ),
     path(
-        "nurse/<int:pk>",
+        "nurse",
         NurseDetailsView.as_view(),
         name="nurse_details",
     ),
     path(
-        "user/profile/<pk>",
+        "user/profile",
         UpdateUserProfileView.as_view(),
         name="update_user_profile",
     ),
     path(
-        "patient/profile/<pk>",
+        "patient/profile",
         UpdatePatientProfileView.as_view(),
         name="update_patient_profile",
     ),
     path(
-        "nurse/profile/<pk>",
+        "nurse/profile",
         UpdateNurseProfileView.as_view(),
         name="update_nurse_profile",
     ),
     path(
-        "nurse/work_hours/",
+        "nurse/work-hours/",
         WorkHoursViewSet.as_view(
             {
                 "get": "list",
@@ -166,7 +166,7 @@ urlpatterns = [
         name="work_hours_list",
     ),
     path(
-        "nurse/work_hours/<int:pk>/",
+        "nurse/work-hours/<int:pk>/",
         WorkHoursViewSet.as_view(
             {
                 # 'get': 'retrieve',

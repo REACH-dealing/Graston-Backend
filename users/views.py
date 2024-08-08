@@ -1,5 +1,5 @@
 import datetime
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.exceptions import AuthenticationFailed
@@ -240,6 +240,13 @@ class LogoutView(viewsets.ModelViewSet):
 class SoftDeleteAccountView(generics.DestroyAPIView):
     queryset = User.objects.filter(is_active=True)
 
+    def get_object(self):
+        try:
+            user = self.request.user
+            return user
+        except User.DoesNotExist:
+            raise Http404("User does not exist")
+
     def delete(self, request, *args, **kwargs):
         user = self.get_object()
         user.is_active = False
@@ -265,9 +272,11 @@ class PatientDetailsView(generics.RetrieveAPIView):
     serializer_class = PatientSerializer
 
     def get_object(self):
-        user_id = self.kwargs.get("pk")
-
-        return Patient.objects.get(user__id=user_id)
+        try:
+            patient = self.request.user.patient
+            return patient
+        except Patient.DoesNotExist:
+            raise Http404("Patient does not exist")
 
 
 class NurseDetailsView(generics.RetrieveAPIView):
@@ -275,9 +284,11 @@ class NurseDetailsView(generics.RetrieveAPIView):
     serializer_class = NurseSerializer
 
     def get_object(self):
-        user_id = self.kwargs.get("pk")
-
-        return Nurse.objects.get(user__id=user_id)
+        try:
+            nurse = self.request.user.nurse
+            return nurse
+        except Nurse.DoesNotExist:
+            raise Http404("Nurse does not exist")
 
 
 class PasswordChangeView(generics.GenericAPIView):
@@ -440,6 +451,13 @@ class UpdateUserProfileView(generics.UpdateAPIView):
     serializer_class = UpdateUserProfileSerializer
     http_method_names = ["patch"]
 
+    def get_object(self):
+        try:
+            user = self.request.user
+            return user
+        except User.DoesNotExist:
+            raise Http404("User does not exist")
+
 
 class UpdatePatientProfileView(generics.UpdateAPIView):
     queryset = Patient.objects.all()
@@ -447,9 +465,11 @@ class UpdatePatientProfileView(generics.UpdateAPIView):
     http_method_names = ["patch"]
 
     def get_object(self):
-        user_id = self.kwargs.get("pk")
-
-        return Patient.objects.get(user__id=user_id)
+        try:
+            patient = self.request.user.patient
+            return patient
+        except Patient.DoesNotExist:
+            raise Http404("Patient does not exist")
 
 
 class UpdateNurseProfileView(generics.UpdateAPIView):
@@ -458,14 +478,21 @@ class UpdateNurseProfileView(generics.UpdateAPIView):
     http_method_names = ["put"]
 
     def get_object(self):
-        return self.request.user.nurse
+        try:
+            nurse = self.request.user.nurse
+            return nurse
+        except Nurse.DoesNotExist:
+            raise Http404("Nurse does not exist")
 
     def update(self, request, *args, **kwargs):
         user = request.user
 
         if user.profile_completed:
-            return Response({"detail": "Profile is already completed"}, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Response(
+                {"detail": "Profile is already completed"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         response = super().update(request, *args, **kwargs)
 
         user.profile_updated = True
@@ -473,14 +500,11 @@ class UpdateNurseProfileView(generics.UpdateAPIView):
 
         return response
 
-    
-
-
 
 class WorkHoursViewSet(viewsets.ModelViewSet):
     queryset = WorkAvailableHours.objects.all()
     serializer_class = WorkHoursSerializer
-    http_method_names = ['get', 'post', 'put', 'delete']
+    http_method_names = ["get", "post", "put", "delete"]
 
     def get_queryset(self):
         nurse = self.request.user.nurse
@@ -507,7 +531,6 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 # class RetrieveWorkHours(generics.ListAPIView):

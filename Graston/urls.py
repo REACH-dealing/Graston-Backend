@@ -24,7 +24,12 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from rest_framework import routers
+
 from users.views import *
+
+from graston_sessions.views import *
+
 
 urlpatterns = [
     # admin end point
@@ -55,4 +60,29 @@ urlpatterns = [
     # path("users/search/<str:string>/", UserSearch.as_view({"get": "list"})),
     path("send-email/", send_simple_email, name="send_email"),
     path("api/token/", Tokens.as_view({"post": "post"}), name="token_obtain_pair"),
+
+
+
+    path("session_type/", SessionTypeListView.as_view(), name="session_type_list"),
+    path("session_type/<pk>", SessionTypeRetrieveView.as_view(), name="session_type"),
+    path("session_type/craete/", SessionTypeCreateView.as_view(), name="session_type_create"),
+    path("session_type/update/<pk>", SessionTypeUpdateView.as_view(), name="session_type_update"),
+    path("session_type/delete/<pk>", SessionTypeDeleteView.as_view(), name="session_type_delete"),
+
+    
+    path("session_package/", SessionPackageListView.as_view(), name="session_package_list"),
+    path("session_package/<pk>", SessionPackageRetrieveView.as_view(), name="session_package"),
+    path("session_package/craete/", SessionPackageCreateView.as_view(), name="session_package_create"),
+    path("session_package/update/<pk>", SessionPackageUpdateView.as_view(), name="session_package_update"),
+    path("session_package/delete/<pk>", SessionPackageDeleteView.as_view(), name="session_package_delete"),
+
+    
+    path("session/", SessionListView.as_view(), name="session_list"),
+    path("session/<pk>", SessionRetrieveView.as_view(), name="session"),
+    path("session/craete/", SessionCreateView.as_view(), name="session_create"),
+    path("session/update/<pk>", SessionUpdateView.as_view(), name="session_update"),
+    path("session/delete/<pk>", SessionDeleteView.as_view(), name="session_delete"),
+
+    path("session/cancel/<pk>", CancelSessionView.as_view(), name="session_cancel")
+    
 ]

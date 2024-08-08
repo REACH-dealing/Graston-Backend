@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.core.validators import validate_email
 
 
 class Gender(models.TextChoices):
@@ -31,21 +32,34 @@ class User(AbstractUser):
     id = models.AutoField(primary_key=True)
     national_id = models.CharField(max_length=55, unique=True)
     identity = models.CharField(max_length=8, choices=Identity)
-    gender = models.CharField(max_length=8, choices=Gender, blank=True)
-    phone_number = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(
+        max_length=63,
+        blank=True,
+        null=True,
+        validators=[validate_email],
+        unique=True,
+    )
+    password = models.CharField(max_length=128)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    gender = models.CharField(max_length=8, choices=Gender, blank=True, null=True)
+    nationality = models.CharField(max_length=27, blank=True, null=True)
+    location = models.CharField(max_length=55, blank=True, null=True)
+    city = models.CharField(max_length=27, blank=True, null=True)
+    country = models.CharField(max_length=27, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    profile_image = models.ImageField(
+        upload_to="media/profile_images/", blank=True, null=True
+    )
     bio = models.TextField(blank=True)
-    nationality = models.CharField(max_length=28, blank=True)
-    location = models.CharField(max_length=55, blank=True)
-    city = models.CharField(max_length=28, blank=True)
-    country = models.CharField(max_length=28, blank=True)
-    date_of_birth = models.DateField(blank=True)
-    profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
     is_verified = models.BooleanField(default=False)
 
+    profile_completed = models.BooleanField(default=False)
 
+    # override some attributes
     last_login = None
     groups = None
     user_permissions = None
+
     # django depend on username in authentication process but
     # we want to depend on email in authentication process
     # because email is unique field
@@ -58,16 +72,19 @@ class User(AbstractUser):
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     chronic_diseases = models.CharField(max_length=255, blank=True, null=True)
-    medical_report = models.FileField(upload_to='reports/', blank=True, null=True)
+    medical_report = models.FileField(upload_to="reports/", blank=True, null=True)
 
 
 # remember to handle working hours field
 class Nurse(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     specialization = models.CharField(max_length=100, blank=True, null=True)
-    certificates = models.FileField(upload_to='certificates/', blank=True, null=True)
-    medical_accreditations = models.FileField(upload_to='accreditations/', blank=True, null=True)
-    available_working_hours = models.CharField(max_length=255, blank=True, null=True)
+    certificates = models.FileField(upload_to="certificates/", blank=True, null=True)
+    medical_accreditations = models.FileField(
+        upload_to="accreditations/", blank=True, null=True
+    )
+
+    admin_verification = models.BooleanField(default=False)
 
 
 class Admin(models.Model):
@@ -94,3 +111,53 @@ class Admin(models.Model):
 
 #     def __str__(self):
 #         return f"Session between {self.patient.name} and {self.nurse.name}"
+
+
+class VerificationRequests(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.EmailField(
+        max_length=63, blank=True, null=True, validators=[validate_email]
+    )
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    otp = models.SmallIntegerField(blank=True, null=True)
+    otp_max_try = models.SmallIntegerField(default=3)
+    otp_expiry = models.DateTimeField(blank=True, null=True)
+    otp_max_out = models.DateTimeField(blank=True, null=True)
+    otp_done = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class DayChoices(models.TextChoices):
+    """
+    Day choices for user
+    """
+
+    SATURDAY = "SATURDAY"
+    SUNDAY = "SUNDAY"
+    MONDAY = "MONDAY"
+    TUESDAY = "TUESDAY"
+    WEDNESDAY = "WEDNESDAY"
+    THURSDAY = "THURSDAY"
+    FRIDAY = "FRIDAY"
+
+
+class WorkAvailableHours(models.Model):
+    nurse = models.ForeignKey(Nurse, on_delete=models.CASCADE)
+    day = models.CharField(max_length=15, choices=DayChoices)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    class Meta:
+        unique_together = ("nurse", "day")
+
+    # def clean(self):
+    #     super().clean()
+    #     if self.start_time and self.end_time and self.start_time >= self.end_time:
+    #         raise ValidationError("Start time must be less than end time.")
+
+    # def save(self, *args, **kwargs):
+    #     self.full_clean()
+    #     super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.nurse.email} - {self.date} {self.start_time}-{self.end_time}"
